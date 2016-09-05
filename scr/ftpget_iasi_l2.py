@@ -55,11 +55,8 @@ LOCAL_DIR = '/data/prod/satellit/iasi'
 pattern = 'IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5'
 p__ = Parser(pattern)
 
-from pyorbital import orbital
 from pyresample import utils as pr_utils
-from pyresample.spherical_geometry import point_inside, Coordinate
-
-from utils import granule_inside_area
+from iasi_level2.utils import granule_inside_area
 
 
 for day in [today, yesterday]:

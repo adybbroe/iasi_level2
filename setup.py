@@ -38,7 +38,7 @@ SHORT_DESC = ("EARS-IASI level-2 format converter")
 version = imp.load_source(
     'iasi_level2.version', 'iasi_level2/version.py')
 
-setup(name='iasi-level2',
+setup(name='iasi_level2',
       version='0.1.0',
       description=SHORT_DESC,
       author='Adam Dybbroe',
@@ -68,8 +68,8 @@ setup(name='iasi-level2',
                         'pyorbital >= v0.2.3'],
 
       # test_requires=["mock"],
-      scripts=['iasi_level2/ftpget_iasi_l2.py',
-               'iasi_level2/ears_iasi_lvl2_converter.py', ],
+      scripts=['scr/ftpget_iasi_l2.py',
+               'scr/ears_iasi_lvl2_converter.py', ],
       # data_files=[('etc', ['etc/iasi_level2_config.cfg.template']),
       #            ],
       # test_suite='tests.suite',

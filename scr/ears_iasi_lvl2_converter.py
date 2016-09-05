@@ -73,7 +73,7 @@ sat_dict = {'npp': 'Suomi NPP',
             'metop-a': 'Metop-A',
             }
 
-from .iasi_lvl2 import iasilvl2
+from iasi_level2.iasi_lvl2 import iasilvl2
 
 
 def format_conversion(jobreg, message, **kwargs):

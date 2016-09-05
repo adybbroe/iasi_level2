@@ -68,7 +68,7 @@ setup(name='iasi-level2',
                         'pyorbital >= v0.2.3'],
 
       test_requires=["mock"],
-      scripts=['iasi_level2/ftpget_iasi.py', ],
+      scripts=['iasi_level2/ftpget_iasi_l2.py', ],
       data_files=[('etc', ['etc/iasi_level2.cfg_template']),
                   ],
       test_suite='tests.suite',

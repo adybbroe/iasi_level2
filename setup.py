@@ -69,7 +69,7 @@ setup(name='iasi-level2',
 
       test_requires=["mock"],
       scripts=['iasi_level2/ftpget_iasi_l2.py', ],
-      data_files=[('etc', ['etc/iasi_level2.cfg_template']),
+      data_files=[('etc', ['etc/iasi_level2_config.cfg.template']),
                   ],
       test_suite='tests.suite',
       tests_require=[],

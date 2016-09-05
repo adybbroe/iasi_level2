@@ -1,0 +1,19 @@
+[DEFAULT]
+
+ftp_host = ftp.eumetsat.int
+remote_dir = /pub/EUM/out/RSP/hultberg/PW3_M01/
+login_user = ftp
+login_passwd=adam.dybbroe@smhi.se
+area_of_interest=euron1
+posttroll_topic=/2/iasi/ears
+
+
+[prod]
+#OUTPUT_PATH = /data/24/saf/polar_out/regional/
+output_path = /data/prod/satellit/iasi/
+
+[test]
+output_path = /data/prodtest/saf/polar_out/regional/
+
+[utv]
+output_path = /data/proj/safutv/polar_out/regional/

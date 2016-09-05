@@ -31,9 +31,7 @@ from netCDF4 import Dataset
 from datetime import datetime, timedelta
 from trollsift import parser
 
-PLATFORMS = {'M01': 'Metop-B',
-             'M02': 'Metop-A',
-             'M03': 'Metop-C'}
+from .utils import PLATFORMS
 
 NC_COMPRESS_LEVEL = 6
 

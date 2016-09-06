@@ -20,117 +20,127 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script to fetch IASI level 2 profiles from ftp at EUMETSAT. It checks if
-the granule is inside our area of interest (euron1) and downloads the data and
-converts it to netCDF on the fly.
+"""Script to fetch IASI level 2 profiles from ftp at EUMETSAT.
 
 """
+
+import os
+from ConfigParser import RawConfigParser
+import argparse
+import logging
+LOG = logging.getLogger(__name__)
+
+CFG_DIR = os.environ.get('IASI_LVL2_CONFIG_DIR', './')
+DIST = os.environ.get("SMHI_DIST", 'elin4')
+if not DIST or DIST == 'linda4':
+    MODE = 'offline'
+else:
+    MODE = os.environ.get("SMHI_MODE", 'offline')
+
+CONF = RawConfigParser()
+CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
+LOG.debug("Config file = " + str(CFG_FILE))
+if not os.path.exists(CFG_FILE):
+    raise IOError('Config file %s does not exist!' % CFG_FILE)
+
+CONF.read(CFG_FILE)
+OPTIONS = {}
+for option, value in CONF.items("DEFAULT"):
+    OPTIONS[option] = value
+
+for option, value in CONF.items(MODE):
+    OPTIONS[option] = value
+
+HOST = OPTIONS['ftp_host']
+REMOTE_DIRS = [OPTIONS['remote_dir'], ]
+USER = OPTIONS['login_user']
+PASSWD = OPTIONS['login_passwd']
+DAYS_IN_PAST = int(OPTIONS['time_window_days'])
+
+#: Default time format
+_DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+#: Default log format
+_DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
+
 
 import socket
 from ftplib import FTP
 from datetime import datetime, timedelta
-import os
 import tempfile
 import numpy as np
-from iasi_lvl2 import iasilvl2, PLATFORMS
-
 from trollsift import Parser
 
-today = datetime.today()
-oneday = timedelta(1)
-yesterday = today - oneday
 
-HOST = 'ftp.eumetsat.int'
-# ftp://ftp.eumetsat.int/pub/EUM/out/RSP/hultberg/PW3_M01/
-LOCAL_DIR = '/data/prod/satellit/iasi'
-#LOCAL_DIR = '/home/a000680/data/iasi'
-#LOCAL_DIR = '/data/temp/AdamD/iasi'
+if __name__ == "__main__":
 
-#    p__ = Parser(
-#        '{band_id:s}_{satid:s}_d{start_date:%Y%m%d}_t{start_time:%H%M%S%f}_e{end_time:%H%M%S%f}_b{orbit:s}_c{production_time:s}_noaa_ops.h5')
-# Take the first file and determine the orbit number from that one:
-#    items = p__.parse(files[0])
+    parser = argparse.ArgumentParser(
+        description='ftp retrieval of EARS IASI lvl2 data')
+    parser.add_argument("-d", "--dir",
+                        help="Destination directory path")
 
-# IASI_PW3_02_M01_20160309180258Z_20160309180554Z_N_O_20160309184345Z.h5
-pattern = 'IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5'
-p__ = Parser(pattern)
+    args = parser.parse_args()
+    outpath = args.dir
 
-from pyresample import utils as pr_utils
-from iasi_level2.utils import granule_inside_area
+    today = datetime.today()
+    ndays = timedelta(DAYS_IN_PAST)
+    yesterday = today - ndays
 
+    # IASI_PW3_02_M01_20160309180258Z_20160309180554Z_N_O_20160309184345Z.h5
+    pattern = 'IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5'
+    p__ = Parser(pattern)
 
-for day in [today, yesterday]:
-    dayofyear = day.strftime("%j")
-    year = day.strftime("%Y")
+    for day in [today, yesterday]:
+        dayofyear = day.strftime("%j")
+        year = day.strftime("%Y")
 
-    IASI_REMOTE_DIR = ['/pub/EUM/out/RSP/hultberg/PW3_M01/',
-                       ]
-    PREFIXES = ['IASI_PW3_']
+        PREFIXES = ['IASI_PW3_', ]
+        ftp = FTP(HOST)
+        print ("connecting to %s" % HOST)
+        ftp.login(USER, PASSWD)
+        tempfile.tempdir = outpath
+        for (remotedir, prefix) in zip(REMOTE_DIRS, PREFIXES):
+            remotefiles = ftp.nlst(remotedir)
+            fnames = [os.path.basename(f) for f in remotefiles]
+            dates_remote = [p__.parse(s)['start_time'] for s in fnames]
 
-    ftp = FTP(HOST)
-    print ("connecting to %s" % HOST)
-    ftp.login('ftp', 'adam.dybbroe@smhi.se')
+            rfarr = np.array(remotefiles)
+            drarr = np.array(dates_remote)
+            remotefiles = rfarr[drarr > day - ndays].tolist()
+            remotefiles = [r for r in remotefiles if (
+                r.endswith('.h5') and os.path.basename(r).startswith(prefix))]
 
-    tempfile.tempdir = LOCAL_DIR
-    for (remotedir, prefix) in zip(IASI_REMOTE_DIR, PREFIXES):
-        remotefiles = ftp.nlst(remotedir)
-        fnames = [os.path.basename(f) for f in remotefiles]
-        dates_remote = [p__.parse(s)['start_time'] for s in fnames]
+            localfiles = [
+                os.path.join(outpath,
+                             os.path.basename(f.strip('.h5'))) for f in remotefiles]
 
-        rfarr = np.array(remotefiles)
-        drarr = np.array(dates_remote)
-        remotefiles = rfarr[drarr > day - oneday].tolist()
-        remotefiles = [r for r in remotefiles if (
-            r.endswith('.h5') and os.path.basename(r).startswith(prefix))]
+            try:
+                for (remote_file, local_file) in zip(remotefiles, localfiles):
+                    if not os.path.isfile(local_file + '.nc'):
 
-        localfiles = [
-            os.path.join(LOCAL_DIR, os.path.basename(f.strip('.h5'))) for f in remotefiles]
+                        out_filename = local_file + '.h5'
+                        tmpfilename = tempfile.mktemp()
+                        try:
+                            file_handle = open(tmpfilename, 'wb')
+                            ftp.retrbinary(
+                                'RETR ' + remote_file, file_handle.write)
+                            file_handle.close()
+                        except socket.error:
+                            print("Cannot get file %s" % remote_file)
+                            if os.path.exists:
+                                os.remove(tmpfilename)
+                            continue
 
-        area_def = pr_utils.load_area('/home/a000680/usr/src/pytroll-config/etc/areas.def',
-                                      areaid)
+                        os.rename(tmpfilename, out_filename)
+                        print("Retrieved file %s" % (out_filename))
+                    else:
+                        print("File already saved, skipping: %s.h5" %
+                              (local_file))
 
-        try:
-            for (remote_file, local_file) in zip(remotefiles, localfiles):
-                if not os.path.isfile(local_file + '.nc'):
-                    # Check if the granule is inside the area of interest:
-                    items = p__.parse(os.path.basename(remote_file))
-                    inside = granule_inside_area(items['start_time'],
-                                                 items['end_time'],
-                                                 items['platform_name'],
-                                                 area_def)
-                    if not inside:
-                        print("Granule %s outside area..." %
-                              os.path.basename(remote_file))
-                        continue
+            except socket.error:
+                print "Exiting"
+                ftp.quit()
+                break
 
-                    #tmpfilename = tempfile.mktemp() + '.h5'
-                    tmpfilename = local_file + '.h5'
-                    nctmpfilename = tempfile.mktemp()
-                    try:
-                        file_handle = open(tmpfilename, 'wb')
-                        ftp.retrbinary(
-                            'RETR ' + remote_file, file_handle.write)
-                        file_handle.close()
-                    except socket.error:
-                        print("Cannot get file %s" % remote_file)
-                        if os.path.exists:
-                            os.remove(tmpfilename)
-                        continue
-
-                    # File conversion hdf5 -> nc:
-                    l2p = iasilvl2(tmpfilename)
-                    l2p.ncwrite(nctmpfilename)
-                    os.rename(nctmpfilename, local_file + '.nc')
-                    # os.remove(tmpfilename)
-                    print("Retrieved %s and converted to %s" %
-                          (remote_file, local_file + '.nc'))
-                else:
-                    print("File already saved, skipping: %s.h5" % (local_file))
-
-        except socket.error:
-            print "Exiting"
-            ftp.quit()
-            break
-
-    print "Exiting"
-    ftp.quit()
+        print "Exiting"
+        ftp.quit()

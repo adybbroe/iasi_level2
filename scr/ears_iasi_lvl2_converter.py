@@ -38,10 +38,12 @@ else:
 CONF = RawConfigParser()
 CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
 LOG.debug("Config file = " + str(CFG_FILE))
+AREA_DEF_FILE = os.path.join(CFG_DIR, "areas.def")
 if not os.path.exists(CFG_FILE):
     raise IOError('Config file %s does not exist!' % CFG_FILE)
 
 CONF.read(CFG_FILE)
+
 OPTIONS = {}
 for option, value in CONF.items("DEFAULT"):
     OPTIONS[option] = value
@@ -50,6 +52,7 @@ for option, value in CONF.items(MODE):
     OPTIONS[option] = value
 
 OUTPUT_PATH = OPTIONS['output_path']
+AREA_ID = OPTIONS['area_of_interest']
 
 #: Default time format
 _DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -74,6 +77,8 @@ sat_dict = {'npp': 'Suomi NPP',
             }
 
 from iasi_level2.iasi_lvl2 import iasilvl2
+from pyresample import utils as pr_utils
+from iasi_level2.utils import granule_inside_area
 
 
 def format_conversion(jobreg, message, **kwargs):
@@ -89,17 +94,28 @@ def format_conversion(jobreg, message, **kwargs):
 
     tempfile.tempdir = OUTPUT_PATH
 
-    # File conversion hdf5 -> nc:
-    l2p = iasilvl2(urlobj.path)
-    nctmpfilename = tempfile.mktemp()
-    l2p.ncwrite(nctmpfilename)
-    local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
-    os.rename(nctmpfilename, local_path_prefix + '.nc')
+    area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
+
+    # Check if the granule is inside the area of interest:
+    inside = granule_inside_area(message['start_time'],
+                                 message['end_time'],
+                                 message['platform_name'],
+                                 area_def)
+
+    if inside:
+        # File conversion hdf5 -> nc:
+        l2p = iasilvl2(urlobj.path)
+        nctmpfilename = tempfile.mktemp()
+        l2p.ncwrite(nctmpfilename)
+        local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
+        os.rename(nctmpfilename, local_path_prefix + '.nc')
+    else:
+        LOG.info("Data outside area of interest. Ignore...")
 
     return jobreg
 
 
-def schedule_page_generator():
+def iasi_level2_runner():
     """Listens and triggers processing"""
 
     LOG.info(
@@ -130,4 +146,4 @@ if __name__ == "__main__":
     logging.getLogger('posttroll').setLevel(logging.INFO)
 
     LOG = logging.getLogger('ears_iasi_lvl2_converter')
-    schedule_page_generator()
+    iasi_level2_runner()

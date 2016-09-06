@@ -97,9 +97,9 @@ def format_conversion(jobreg, message, **kwargs):
     area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
 
     # Check if the granule is inside the area of interest:
-    inside = granule_inside_area(message['start_time'],
-                                 message['end_time'],
-                                 message['platform_name'],
+    inside = granule_inside_area(message.data['start_time'],
+                                 message.data['end_time'],
+                                 message.data['platform_name'],
                                  area_def)
 
     if inside:

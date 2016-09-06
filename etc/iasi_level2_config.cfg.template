@@ -7,6 +7,8 @@ login_passwd=adam.dybbroe@smhi.se
 area_of_interest=euron1
 posttroll_topic=/2/iasi/ears
 
+[offline]
+output_path = /home/a000680/data/iasi
 
 [prod]
 #OUTPUT_PATH = /data/24/saf/polar_out/regional/

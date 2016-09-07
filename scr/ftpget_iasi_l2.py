@@ -30,32 +30,6 @@ import argparse
 import logging
 LOG = logging.getLogger(__name__)
 
-CFG_DIR = os.environ.get('IASI_LVL2_CONFIG_DIR', './')
-DIST = os.environ.get("SMHI_DIST", 'elin4')
-if not DIST or DIST == 'linda4':
-    MODE = 'offline'
-else:
-    MODE = os.environ.get("SMHI_MODE", 'offline')
-
-CONF = RawConfigParser()
-CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
-LOG.debug("Config file = " + str(CFG_FILE))
-if not os.path.exists(CFG_FILE):
-    raise IOError('Config file %s does not exist!' % CFG_FILE)
-
-CONF.read(CFG_FILE)
-OPTIONS = {}
-for option, value in CONF.items("DEFAULT"):
-    OPTIONS[option] = value
-
-for option, value in CONF.items(MODE):
-    OPTIONS[option] = value
-
-HOST = OPTIONS['ftp_host']
-REMOTE_DIRS = [OPTIONS['remote_dir'], ]
-USER = OPTIONS['login_user']
-PASSWD = OPTIONS['login_passwd']
-
 #: Default time format
 _DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -77,6 +51,8 @@ if __name__ == "__main__":
         description='ftp retrieval of EARS IASI lvl2 data')
     parser.add_argument("-d", "--dir",
                         help="Destination directory path")
+    parser.add_argument("-c", "--cfgdir",
+                        help="Config directory")
     parser.add_argument("--hours",
                         help="How far back in time in hours to fetch",
                         type=int)
@@ -84,6 +60,32 @@ if __name__ == "__main__":
     args = parser.parse_args()
     outpath = args.dir
     hours = args.hours
+    CFG_DIR = args.cfgdir
+
+    DIST = os.environ.get("SMHI_DIST", 'elin4')
+    if not DIST or DIST == 'linda4':
+        MODE = 'offline'
+    else:
+        MODE = os.environ.get("SMHI_MODE", 'offline')
+
+    CONF = RawConfigParser()
+    CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
+    LOG.debug("Config file = " + str(CFG_FILE))
+    if not os.path.exists(CFG_FILE):
+        raise IOError('Config file %s does not exist!' % CFG_FILE)
+
+    CONF.read(CFG_FILE)
+    OPTIONS = {}
+    for option, value in CONF.items("DEFAULT"):
+        OPTIONS[option] = value
+
+    for option, value in CONF.items(MODE):
+        OPTIONS[option] = value
+
+    HOST = OPTIONS['ftp_host']
+    REMOTE_DIRS = [OPTIONS['remote_dir'], ]
+    USER = OPTIONS['login_user']
+    PASSWD = OPTIONS['login_passwd']
 
     today = datetime.today()
     dtime = timedelta(seconds=3600 * hours)

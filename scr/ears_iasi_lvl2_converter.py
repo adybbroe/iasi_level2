@@ -20,7 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""A posttroll runner that takes ears-iasi level-2 hdf5 files and convert to netCDF
+"""A posttroll runner that takes ears-iasi level-2 hdf5 files and 
+convert to netCDF
 """
 
 import os
@@ -60,11 +61,27 @@ _DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 #: Default log format
 _DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
 
+servername = None
+import socket
+servername = socket.gethostname()
+SERVERNAME = OPTIONS.get('servername', servername)
+
 import sys
 from urlparse import urlparse
 import posttroll.subscriber
 from posttroll.publisher import Publish
 import tempfile
+import netifaces
+from posttroll.message import Message
+from datetime import datetime
+
+from multiprocessing import Pool, Manager
+import threading
+from Queue import Empty
+
+from iasi_level2.iasi_lvl2 import iasilvl2
+from pyresample import utils as pr_utils
+from iasi_level2.utils import granule_inside_area
 
 sat_dict = {'npp': 'Suomi NPP',
             'noaa19': 'NOAA 19',
@@ -76,43 +93,177 @@ sat_dict = {'npp': 'Suomi NPP',
             'metop-a': 'Metop-A',
             }
 
-from iasi_level2.iasi_lvl2 import iasilvl2
-from pyresample import utils as pr_utils
-from iasi_level2.utils import granule_inside_area
+
+def get_local_ips():
+    inet_addrs = [netifaces.ifaddresses(iface).get(netifaces.AF_INET)
+                  for iface in netifaces.interfaces()]
+    ips = []
+    for addr in inet_addrs:
+        if addr is not None:
+            for add in addr:
+                ips.append(add['addr'])
+    return ips
 
 
-def format_conversion(jobreg, message, **kwargs):
+def reset_job_registry(objdict, key):
+    """Remove job key from registry"""
+    LOG.debug("Release/reset job-key " + str(key) + " from job registry")
+    if key in objdict:
+        objdict.pop(key)
+    else:
+        LOG.warning("Nothing to reset/release - " +
+                    "Register didn't contain any entry matching: " +
+                    str(key))
+    return
+
+
+class FilePublisher(threading.Thread):
+
+    """A publisher for the iasi level2 netCDF files. Picks up the return value
+    from the xxx when ready, and publishes the files via posttroll
+
+    """
+
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.loop = True
+        self.queue = queue
+        self.jobs = {}
+
+    def stop(self):
+        """Stops the file publisher"""
+        self.loop = False
+        self.queue.put(None)
+
+    def run(self):
+
+        with Publish('ears_iasi_lvl2_converter', 0, ['netCDF/3', ]) as publisher:
+
+            while self.loop:
+                retv = self.queue.get()
+
+                if retv != None:
+                    LOG.info("Publish the IASI level-2 netcdf file")
+                    publisher.send(retv)
+
+
+class FileListener(threading.Thread):
+
+    """A file listener class, to listen for incoming messages with a 
+    relevant file for further processing"""
+
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.loop = True
+        self.queue = queue
+
+    def stop(self):
+        """Stops the file listener"""
+        self.loop = False
+        self.queue.put(None)
+
+    def run(self):
+
+        with posttroll.subscriber.Subscribe('', [OPTIONS['posttroll_topic'], ],
+                                            True) as subscr:
+
+            for msg in subscr.recv(timeout=90):
+                if not self.loop:
+                    break
+
+                # Check if it is a relevant message:
+                if self.check_message(msg):
+                    LOG.debug("Put the message on the queue...")
+                    self.queue.put(msg)
+
+    def check_message(self, msg):
+
+        if not msg:
+            return False
+
+        urlobj = urlparse(msg.data['uri'])
+        server = urlobj.netloc
+        url_ip = socket.gethostbyname(urlobj.netloc)
+        if urlobj.netloc and (url_ip not in get_local_ips()):
+            LOG.warning("Server %s not the current one: %s",
+                        str(server),
+                        socket.gethostname())
+            return False
+
+        if ('platform_name' not in msg.data or
+                'start_time' not in msg.data):
+            LOG.warning(
+                "Message is lacking crucial fields...")
+            return False
+
+        LOG.debug("Ok: message = %s", str(msg))
+        return True
+
+
+def create_message(resultfile, mda):
+    """Create the posttroll message"""
+
+    to_send = mda.copy()
+    to_send['uri'] = ('ssh://%s/%s' % (SERVERNAME, resultfile))
+    to_send['uid'] = resultfile
+    to_send['type'] = 'netCDF'
+    to_send['format'] = 'IASI-L2'
+    to_send['data_processing_level'] = '3'
+    environment = MODE
+    pub_message = Message('/' + to_send['format'] + '/' +
+                          to_send['data_processing_level'] +
+                          environment +
+                          '/polar/regional/',
+                          "file", to_send).encode()
+
+    return pub_message
+
+
+def format_conversion(mda, scene, job_id, publish_q):
     """Read the hdf5 file and add parameters and convert to netCDF
 
     """
-    LOG.info("")
-    LOG.info("job-registry dict: " + str(jobreg))
-    LOG.info("\tMessage:")
-    LOG.info(message)
-    urlobj = urlparse(message.data['uri'])
-    dummy, fname = os.path.split(urlobj.path)
+    try:
+        LOG.debug("IASI L2 format converter: Start...")
 
-    tempfile.tempdir = OUTPUT_PATH
+        dummy, fname = os.path.split(scene['filename'])
+        tempfile.tempdir = OUTPUT_PATH
 
-    area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
+        area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
 
-    # Check if the granule is inside the area of interest:
-    inside = granule_inside_area(message.data['start_time'],
-                                 message.data['end_time'],
-                                 message.data['platform_name'],
-                                 area_def)
+        # Check if the granule is inside the area of interest:
+        inside = granule_inside_area(scene['starttime'],
+                                     scene['endtime'],
+                                     scene['platform_name'],
+                                     area_def)
 
-    if inside:
+        if not inside:
+            LOG.info("Data outside area of interest. Ignore...")
+            return
+
         # File conversion hdf5 -> nc:
-        l2p = iasilvl2(urlobj.path)
+        l2p = iasilvl2(scene['filename'])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
         local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
-        os.rename(nctmpfilename, local_path_prefix + '.nc')
-    else:
-        LOG.info("Data outside area of interest. Ignore...")
+        result_file = local_path_prefix + '.nc'
+        os.rename(nctmpfilename, result_file)
 
-    return jobreg
+        pubmsg = create_message(result_file, mda)
+        LOG.info("Sending: " + str(pubmsg))
+        publish_q.put(pubmsg)
+
+        if isinstance(job_id, datetime):
+            dt_ = datetime.utcnow() - job_id
+            LOG.info("IASI level-2 netCDF file " + str(job_id) +
+                     " finished. It took: " + str(dt_))
+        else:
+            LOG.warning(
+                "Job entry is not a datetime instance: " + str(job_id))
+
+    except:
+        LOG.exception('Failed in IASI L2 format converter...')
+        raise
 
 
 def iasi_level2_runner():
@@ -120,18 +271,81 @@ def iasi_level2_runner():
 
     LOG.info(
         "*** Start the extraction and conversion of ears iasi level2 profiles")
-    with posttroll.subscriber.Subscribe('', [OPTIONS['posttroll_topic'], ],
-                                        True) as subscr:
-        with Publish('ears_iasi_lvl2_converter', 0) as publisher:
-            job_registry = {}
-            for msg in subscr.recv():
-                job_registry = format_conversion(
-                    job_registry, msg, publisher=publisher)
-                # Cleanup in registry (keep only the last 5):
-                keys = job_registry.keys()
-                if len(keys) > 5:
-                    keys.sort()
-                    job_registry.pop(keys[0])
+
+    pool = Pool(processes=6, maxtasksperchild=1)
+    manager = Manager()
+    listener_q = manager.Queue()
+    publisher_q = manager.Queue()
+
+    pub_thread = FilePublisher(publisher_q)
+    pub_thread.start()
+    listen_thread = FileListener(listener_q)
+    listen_thread.start()
+
+    jobs_dict = {}
+    while True:
+
+        try:
+            msg = listener_q.get()
+        except Empty:
+            LOG.debug("Empty listener queue...")
+            continue
+
+        LOG.debug(
+            "Number of threads currently alive: " + str(threading.active_count()))
+
+        if 'start_time' in msg.data:
+            start_time = msg.data['start_time']
+        elif 'nominal_time' in msg.data:
+            start_time = msg.data['nominal_time']
+        else:
+            LOG.warning("Neither start_time nor nominal_time in message!")
+            start_time = None
+
+        if 'end_time' in msg.data:
+            end_time = msg.data['end_time']
+        else:
+            LOG.warning("No end_time in message!")
+            end_time = None
+
+        sensor = str(msg.data['sensor'])
+        platform_name = msg.data['platform_name']
+
+        keyname = (str(platform_name) + '_' +
+                   str(start_time.strftime('%Y%m%d%H%M')))
+
+        urlobj = urlparse(msg.data['uri'])
+        path, fname = os.path.split(urlobj.path)
+        LOG.debug("path " + str(path) + " filename = " + str(fname))
+
+        scene = {'platform_name': platform_name,
+                 'starttime': start_time,
+                 'endtime': end_time,
+                 'sensor': sensor,
+                 'filename': urlobj.path}
+
+        if keyname not in jobs_dict:
+            LOG.warning("Scene-run seems unregistered! Forget it...")
+            continue
+
+        pool.apply_async(format_conversion,
+                         (msg.data, scene,
+                          jobs_dict[
+                              keyname],
+                          publisher_q))
+
+        # Block any future run on this scene for x minutes from now
+        # x = 5
+        thread_job_registry = threading.Timer(
+            5 * 60.0, reset_job_registry, args=(jobs_dict, keyname))
+        thread_job_registry.start()
+
+    pool.close()
+    pool.join()
+
+    pub_thread.stop()
+    listen_thread.stop()
+
 
 if __name__ == "__main__":
 

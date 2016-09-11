@@ -314,6 +314,8 @@ def iasi_level2_runner():
         keyname = (str(platform_name) + '_' +
                    str(start_time.strftime('%Y%m%d%H%M')))
 
+        jobs_dict[keyname] = datetime.utcnow()
+
         urlobj = urlparse(msg.data['uri'])
         path, fname = os.path.split(urlobj.path)
         LOG.debug("path " + str(path) + " filename = " + str(fname))
@@ -324,9 +326,9 @@ def iasi_level2_runner():
                  'sensor': sensor,
                  'filename': urlobj.path}
 
-        if keyname not in jobs_dict:
-            LOG.warning("Scene-run seems unregistered! Forget it...")
-            continue
+        # if keyname not in jobs_dict:
+        #    LOG.warning("Scene-run seems unregistered! Forget it...")
+        #    continue
 
         pool.apply_async(format_conversion,
                          (msg.data, scene,

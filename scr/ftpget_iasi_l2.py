@@ -83,7 +83,8 @@ if __name__ == "__main__":
         OPTIONS[option] = value
 
     HOST = OPTIONS['ftp_host']
-    REMOTE_DIRS = [OPTIONS['remote_dir'], ]
+    REMOTE_DIRS = [os.path.join(OPTIONS['remote_dir'], 'PW3_M01'),
+                   os.path.join(OPTIONS['remote_dir'], 'PW3_M02')]
     USER = OPTIONS['login_user']
     PASSWD = OPTIONS['login_passwd']
 
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     pattern = 'IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5'
     p__ = Parser(pattern)
 
-    PREFIXES = ['IASI_PW3_', ]
+    PREFIXES = ['IASI_PW3_', 'IASI_PW3_', ]
     ftp = FTP(HOST)
     print ("connecting to %s" % HOST)
     ftp.login(USER, PASSWD)

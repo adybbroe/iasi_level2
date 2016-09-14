@@ -1,7 +1,7 @@
 [DEFAULT]
 
 ftp_host = ftp.eumetsat.int
-remote_dir = /pub/EUM/out/RSP/hultberg/PW3_M01/
+remote_dir = /pub/EUM/out/RSP/hultberg/
 login_user = ftp
 login_passwd=adam.dybbroe@smhi.se
 area_of_interest=euron1

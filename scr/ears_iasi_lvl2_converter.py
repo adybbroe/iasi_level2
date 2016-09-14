@@ -119,8 +119,8 @@ def reset_job_registry(objdict, key):
 
 class FilePublisher(threading.Thread):
 
-    """A publisher for the iasi level2 netCDF files. Picks up the return value
-    from the xxx when ready, and publishes the files via posttroll
+    """A publisher for the iasi level2 netCDF files. Picks up the return value from
+    the format_conversion when ready, and publishes the files via posttroll
 
     """
 

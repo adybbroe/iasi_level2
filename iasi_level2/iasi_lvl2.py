@@ -374,7 +374,7 @@ class iasilvl2(object):
         root.createDimension('nv', 2)
         # For place naming
         root.createDimension('nvcross_strlen', 80)
-        root.createDimension('nvcross', shape[3] * shape[2])
+        root.createDimension('nvcross', shape[3] * shape[2] / 60)
         root.createDimension('two', 2)
 
         create_time_coordinate(root, self.start_time, self.end_time, shape[0])
@@ -469,7 +469,9 @@ class iasilvl2(object):
         #locnames = ['one scanline']
         #vcrossnamevar[0, 0:len("N7330;E00500")] = "N7330;E00500"
         idx = 0
-        for lname in locnames:
+        for start_name, end_name in zip(np.array(locnames)[0:2760:60],
+                                        np.array(locnames)[59:2760:60]):
+            lname = start_name + ' ' + end_name
             vcrossnamevar[idx, 0:len(lname)] = lname
             idx = idx + 1
         vcrossboundvar = root.createVariable('vcross_bnds', 'i4', ('nvcross', 'two'),
@@ -477,26 +479,14 @@ class iasilvl2(object):
         setattr(vcrossboundvar, "description",
                 "Start- and end-position (included) in lat- and lon-dimensions" +
                 " for each IASI profile")
-        vcrossboundvar[:, 0] = np.arange(shape[3])
-        vcrossboundvar[:, 1] = np.arange(shape[3])
-        #vcrossboundvar[:, 0] = 0
-        #vcrossboundvar[:, 1] = 59
+        vcrossboundvar[:, 0] = np.arange(0, shape[3], 60)
+        vcrossboundvar[:, 1] = np.arange(59, shape[3], 60)
 
         self._set_global_attributes(root)
         root.close()
 
     def _set_global_attributes(self, root):
         """Write the global attributes to the netcdf file"""
-
-        #old_history = ""
-        #date_short = datetime.strftime("%Y-%m-%d", datetime.utcnow())
-
-        # # Copy all attributes from the hdf-files
-        # for key in self.header.keys():
-        #     setattr(root, key, obj.header[key])
-        #     if (key == "history"):
-        #         # Save history for usage below
-        #         old_history = obj.header[key]
 
         # Set attributes that differs from those found in the hdf-file
         setattr(root, "id", self.nc_filename)
@@ -559,8 +549,6 @@ def create_latlon_var(root, latitude, longitude, nodata):
 
 def create_time_coordinate(root, start_time, end_time, timesize=1):
     """Create the time coordinate"""
-    import calendar
-    import time
 
     # Find the time bounds and the middle time
     dtobj_1970 = datetime(1970, 1, 1)

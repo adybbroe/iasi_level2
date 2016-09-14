@@ -242,12 +242,20 @@ def format_conversion(mda, scene, job_id, publish_q):
             return
 
         # File conversion hdf5 -> nc:
+        LOG.info("Read the IASI hdf5 file %s", scene['filename'])
         l2p = iasilvl2(scene['filename'])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
         local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
-        result_file = local_path_prefix + '.nc'
-        os.rename(nctmpfilename, result_file)
+        result_file = local_path_prefix + '_vprof.nc'
+        LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
+        os.rename(l2p.nc_filename, result_file)
+
+        nctmpfilename = tempfile.mktemp()
+        result_file = local_path_prefix + '_vcross.nc'
+        l2p.ncwrite(nctmpfilename, vprof=False)
+        LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
+        os.rename(l2p.nc_filename, result_file)
 
         pubmsg = create_message(result_file, mda)
         LOG.info("Sending: " + str(pubmsg))

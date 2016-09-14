@@ -30,6 +30,8 @@ import numpy as np
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
 from trollsift import parser
+import logging
+LOG = logging.getLogger(__name__)
 
 from .utils import PLATFORMS
 
@@ -350,11 +352,19 @@ class iasilvl2(object):
             # self.time_shape = stime_day.shape
             self.time_shape = (1,)
 
-    def ncwrite(self, filename=None):
+    def ncwrite(self, filename=None, vprof=True):
         """Write the data to a netCDF file"""
 
         if filename:
             self.nc_filename = filename
+        # Add extention (vprof/vcross)
+        prfx = self.nc_filename.split('.nc')[0]
+        if vprof:
+            self.nc_filename = prfx + '_vprof.nc'
+        else:
+            self.nc_filename = prfx + '_vcross.nc'
+
+        LOG.info("Generate netCDF file %s", self.nc_filename)
         root = Dataset(self.nc_filename, 'w', format='NETCDF3_CLASSIC')
 
         # Add time as a dimension
@@ -374,7 +384,11 @@ class iasilvl2(object):
         root.createDimension('nv', 2)
         # For place naming
         root.createDimension('nvcross_strlen', 80)
-        root.createDimension('nvcross', shape[3] * shape[2] / 60)
+        if vprof:
+            root.createDimension('nvcross', shape[3] * shape[2])
+        else:
+            root.createDimension('nvcross', shape[3] * shape[2] / 60)
+
         root.createDimension('two', 2)
 
         create_time_coordinate(root, self.start_time, self.end_time, shape[0])
@@ -469,18 +483,28 @@ class iasilvl2(object):
         #locnames = ['one scanline']
         #vcrossnamevar[0, 0:len("N7330;E00500")] = "N7330;E00500"
         idx = 0
-        for start_name, end_name in zip(np.array(locnames)[0:2760:60],
-                                        np.array(locnames)[59:2760:60]):
-            lname = start_name + ' ' + end_name
-            vcrossnamevar[idx, 0:len(lname)] = lname
-            idx = idx + 1
+        if vprof:
+            for lname in locnames:
+                vcrossnamevar[idx, 0:len(lname)] = lname
+                idx = idx + 1
+        else:
+            for start_name, end_name in zip(np.array(locnames)[0:2760:60],
+                                            np.array(locnames)[59:2760:60]):
+                lname = start_name + ' ' + end_name
+                vcrossnamevar[idx, 0:len(lname)] = lname
+                idx = idx + 1
+
         vcrossboundvar = root.createVariable('vcross_bnds', 'i4', ('nvcross', 'two'),
                                              zlib=True, complevel=NC_COMPRESS_LEVEL)
         setattr(vcrossboundvar, "description",
                 "Start- and end-position (included) in lat- and lon-dimensions" +
                 " for each IASI profile")
-        vcrossboundvar[:, 0] = np.arange(0, shape[3], 60)
-        vcrossboundvar[:, 1] = np.arange(59, shape[3], 60)
+        if vprof:
+            vcrossboundvar[:, 0] = np.arange(shape[3])
+            vcrossboundvar[:, 1] = np.arange(shape[3])
+        else:
+            vcrossboundvar[:, 0] = np.arange(0, shape[3], 60)
+            vcrossboundvar[:, 1] = np.arange(59, shape[3], 60)
 
         self._set_global_attributes(root)
         root.close()
@@ -582,4 +606,5 @@ if __name__ == "__main__":
     TESTFILE = "/home/a000680/data/iasi/IASI_PW3_02_M01_20160530200854Z_20160530201158Z_N_O_20160530203738Z.h5"
     l2p = iasilvl2(TESTFILE)
     l2p.ncwrite()
+    l2p.ncwrite(vprof=False)
     that = iasilvl2(l2p.nc_filename)

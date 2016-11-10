@@ -44,7 +44,9 @@ NODATA = -9.
 
 # Example filename:
 # IASI_PW3_02_M01_20160418132052Z_20160418132356Z_N_O_20160418140305Z.h5
-iasi_file_pattern = "IASI_PW3_02_{platform_name:s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z"
+# iasi_file_pattern = "IASI_PW3_02_{platform_name:s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z"
+#                    W_XX-EUMETSAT-mos,IASI,DBNet+metopb+mos_C_EUMS_20161110084055_IASI_PW3_02
+iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},IASI,DBNet+{platform_name:6s}+{ears_station2:3s}_C_EUMS_{start_time:%Y%m%d%H%M%S}_IASI_PW3_02"
 
 VAR_NAMES_AND_TYPES = {
     "temp": ('air_temperature_ml', 'f'),
@@ -156,6 +158,10 @@ class iasilvl2(object):
             prefix = filename.strip('.h5')
             self.h5_filename = filename
             self.nc_filename = os.path.basename(filename).replace('.h5', '.nc')
+        elif filename.endswith('.hdf'):
+            prefix = filename.strip('.hdf')
+            self.h5_filename = filename
+            self.nc_filename = os.path.basename(filename).replace('.hdf', '.nc')
         else:
             self.h5_filename = None
             self.nc_filename = filename
@@ -177,7 +183,10 @@ class iasilvl2(object):
         piasi = parser.Parser(iasi_file_pattern)
         items = piasi.parse(os.path.basename(prefix))
         self.start_time = items['start_time']
-        self.end_time = items['end_time']
+        if 'end_time' in items:
+            self.end_time = items['end_time']
+        else:
+            self.end_time = self.start_time + timedelta(seconds=15*60)
 
         self.platform_name = PLATFORMS.get(
             items['platform_name'], items['platform_name'])
@@ -488,8 +497,8 @@ class iasilvl2(object):
                 vcrossnamevar[idx, 0:len(lname)] = lname
                 idx = idx + 1
         else:
-            for start_name, end_name in zip(np.array(locnames)[0:2760:60],
-                                            np.array(locnames)[59:2760:60]):
+            for start_name, end_name in zip(np.array(locnames)[0:shape[3]:60],
+                                            np.array(locnames)[59:shape[3]:60]):
                 lname = start_name + ' ' + end_name
                 vcrossnamevar[idx, 0:len(lname)] = lname
                 idx = idx + 1

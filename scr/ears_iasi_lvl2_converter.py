@@ -45,6 +45,8 @@ if not os.path.exists(CFG_FILE):
 
 CONF.read(CFG_FILE)
 
+PLATFORMS={'metopa':'Metop-A', 'metopb':'Metop-B'}
+
 OPTIONS = {}
 for option, value in CONF.items("DEFAULT"):
     OPTIONS[option] = value
@@ -234,7 +236,7 @@ def format_conversion(mda, scene, job_id, publish_q):
         # Check if the granule is inside the area of interest:
         inside = granule_inside_area(scene['starttime'],
                                      scene['endtime'],
-                                     scene['platform_name'],
+                                     PLATFORMS.get(scene['platform_name'],scene['platform_name']),
                                      area_def)
 
         if not inside:
@@ -246,7 +248,11 @@ def format_conversion(mda, scene, job_id, publish_q):
         l2p = iasilvl2(scene['filename'])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
-        local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
+        _tmp_nc_filename = fname.split('.')[0]
+        _tmp_nc_filename_r1 = _tmp_nc_filename.replace('+','_')
+        _tmp_nc_filename = _tmp_nc_filename_r1.replace(',','_')
+        
+        local_path_prefix = os.path.join(OUTPUT_PATH, _tmp_nc_filename)
         result_file = local_path_prefix + '_vprof.nc'
         LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
         os.rename(l2p.nc_filename, result_file)

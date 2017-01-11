@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Adam.Dybbroe
+# Copyright (c) 2016, 2017 Adam.Dybbroe
 
 # Author(s):
 
@@ -45,7 +45,7 @@ if not os.path.exists(CFG_FILE):
 
 CONF.read(CFG_FILE)
 
-PLATFORMS={'metopa':'Metop-A', 'metopb':'Metop-B'}
+PLATFORMS = {'metopa': 'Metop-A', 'metopb': 'Metop-B'}
 
 OPTIONS = {}
 for option, value in CONF.items("DEFAULT"):
@@ -232,11 +232,13 @@ def format_conversion(mda, scene, job_id, publish_q):
         tempfile.tempdir = OUTPUT_PATH
 
         area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
+        LOG.debug("Platform name = %s", scene['platform_name'])
 
         # Check if the granule is inside the area of interest:
         inside = granule_inside_area(scene['starttime'],
                                      scene['endtime'],
-                                     PLATFORMS.get(scene['platform_name'],scene['platform_name']),
+                                     PLATFORMS.get(scene['platform_name'],
+                                                   scene['platform_name']),
                                      area_def)
 
         if not inside:
@@ -249,9 +251,9 @@ def format_conversion(mda, scene, job_id, publish_q):
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
         _tmp_nc_filename = fname.split('.')[0]
-        _tmp_nc_filename_r1 = _tmp_nc_filename.replace('+','_')
-        _tmp_nc_filename = _tmp_nc_filename_r1.replace(',','_')
-        
+        _tmp_nc_filename_r1 = _tmp_nc_filename.replace('+', '_')
+        _tmp_nc_filename = _tmp_nc_filename_r1.replace(',', '_')
+
         local_path_prefix = os.path.join(OUTPUT_PATH, _tmp_nc_filename)
         result_file = local_path_prefix + '_vprof.nc'
         LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)

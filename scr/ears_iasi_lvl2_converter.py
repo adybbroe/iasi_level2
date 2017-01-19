@@ -75,7 +75,7 @@ from posttroll.publisher import Publish
 import tempfile
 import netifaces
 from posttroll.message import Message
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from multiprocessing import Pool, Manager
 import threading
@@ -322,7 +322,15 @@ def iasi_level2_runner():
             end_time = msg.data['end_time']
         else:
             LOG.warning("No end_time in message!")
-            end_time = None
+            if start_time:
+                end_time = start_time + timedelta(seconds=60 * 15)
+            else:
+                end_time = None
+
+        if not start_time or not end_time:
+            LOG.warning("Missing either start_time or end_time or both!")
+            LOG.warning("Ignore message and continue...")
+            continue
 
         sensor = str(msg.data['sensor'])
         platform_name = msg.data['platform_name']
@@ -345,7 +353,6 @@ def iasi_level2_runner():
         # if keyname not in jobs_dict:
         #    LOG.warning("Scene-run seems unregistered! Forget it...")
         #    continue
-
         pool.apply_async(format_conversion,
                          (msg.data, scene,
                           jobs_dict[

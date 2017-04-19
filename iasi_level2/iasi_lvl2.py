@@ -47,7 +47,9 @@ NODATA = -9.
 # iasi_file_pattern = "IASI_PW3_02_{platform_name:s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z"
 #                    W_XX-EUMETSAT-mos,IASI,DBNet+metopb+mos_C_EUMS_20161110084055_IASI_PW3_02
 #iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},IASI,DBNet+{platform_name:6s}+{ears_station2:3s}_C_EUMS_{start_time:%Y%m%d%H%M%S}_IASI_PW3_02"
-iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},iasi,{platform_name:6s}+{ears_station2:3s}_C_EUMS_{processing_time:%Y%m%d%H%M%S}_IASI_PW3_02_{satid:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z"
+# Example:
+# W_XX-EUMETSAT-kan,iasi,metopb+kan_C_EUMS_20170419171127_IASI_PW3_02_M01_20170419164952Z_20170419170214Z.hdf
+iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},iasi,{platform_name2:6s}+{ears_station2:3s}_C_EUMS_{processing_time:%Y%m%d%H%M%S}_IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z"
 
 
 VAR_NAMES_AND_TYPES = {

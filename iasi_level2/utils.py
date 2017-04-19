@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Adam.Dybbroe
+# Copyright (c) 2016, 2017 Adam.Dybbroe
 
 # Author(s):
 
@@ -25,7 +25,10 @@
 
 PLATFORMS = {'M01': 'Metop-B',
              'M02': 'Metop-A',
-             'M03': 'Metop-C'}
+             'M03': 'Metop-C',
+             'METOPA': 'Metop-A',
+             'METOPB': 'Metop-B',
+             'METOPC': 'Metop-C'}
 
 from pyorbital import orbital
 from pyresample.spherical_geometry import point_inside, Coordinate

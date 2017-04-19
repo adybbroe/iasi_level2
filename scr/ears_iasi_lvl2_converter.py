@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 Adam.Dybbroe
+# Copyright (c) 2016, 2017 Adam.Dybbroe
 
 # Author(s):
 
@@ -45,6 +45,8 @@ if not os.path.exists(CFG_FILE):
 
 CONF.read(CFG_FILE)
 
+PLATFORMS = {'metopa': 'Metop-A', 'metopb': 'Metop-B'}
+
 OPTIONS = {}
 for option, value in CONF.items("DEFAULT"):
     OPTIONS[option] = value
@@ -73,7 +75,7 @@ from posttroll.publisher import Publish
 import tempfile
 import netifaces
 from posttroll.message import Message
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from multiprocessing import Pool, Manager
 import threading
@@ -230,11 +232,13 @@ def format_conversion(mda, scene, job_id, publish_q):
         tempfile.tempdir = OUTPUT_PATH
 
         area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
+        LOG.debug("Platform name = %s", scene['platform_name'])
 
         # Check if the granule is inside the area of interest:
         inside = granule_inside_area(scene['starttime'],
                                      scene['endtime'],
-                                     scene['platform_name'],
+                                     PLATFORMS.get(scene['platform_name'],
+                                                   scene['platform_name']),
                                      area_def)
 
         if not inside:
@@ -246,7 +250,11 @@ def format_conversion(mda, scene, job_id, publish_q):
         l2p = iasilvl2(scene['filename'])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
-        local_path_prefix = os.path.join(OUTPUT_PATH, fname.split('.')[0])
+        _tmp_nc_filename = fname.split('.')[0]
+        _tmp_nc_filename_r1 = _tmp_nc_filename.replace('+', '_')
+        _tmp_nc_filename = _tmp_nc_filename_r1.replace(',', '_')
+
+        local_path_prefix = os.path.join(OUTPUT_PATH, _tmp_nc_filename)
         result_file = local_path_prefix + '_vprof.nc'
         LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
         os.rename(l2p.nc_filename, result_file)
@@ -314,7 +322,15 @@ def iasi_level2_runner():
             end_time = msg.data['end_time']
         else:
             LOG.warning("No end_time in message!")
-            end_time = None
+            if start_time:
+                end_time = start_time + timedelta(seconds=60 * 15)
+            else:
+                end_time = None
+
+        if not start_time or not end_time:
+            LOG.warning("Missing either start_time or end_time or both!")
+            LOG.warning("Ignore message and continue...")
+            continue
 
         sensor = str(msg.data['sensor'])
         platform_name = msg.data['platform_name']
@@ -337,7 +353,6 @@ def iasi_level2_runner():
         # if keyname not in jobs_dict:
         #    LOG.warning("Scene-run seems unregistered! Forget it...")
         #    continue
-
         pool.apply_async(format_conversion,
                          (msg.data, scene,
                           jobs_dict[

@@ -46,7 +46,9 @@ NODATA = -9.
 # IASI_PW3_02_M01_20160418132052Z_20160418132356Z_N_O_20160418140305Z.h5
 # iasi_file_pattern = "IASI_PW3_02_{platform_name:s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z"
 #                    W_XX-EUMETSAT-mos,IASI,DBNet+metopb+mos_C_EUMS_20161110084055_IASI_PW3_02
-iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},IASI,DBNet+{platform_name:6s}+{ears_station2:3s}_C_EUMS_{start_time:%Y%m%d%H%M%S}_IASI_PW3_02"
+#iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},IASI,DBNet+{platform_name:6s}+{ears_station2:3s}_C_EUMS_{start_time:%Y%m%d%H%M%S}_IASI_PW3_02"
+#W_XX-EUMETSAT-sva,iasi,metopb+sva_C_EUMS_20170403055128_IASI_PW3_02_M01_20170403053106Z_20170403054345Z.hdf.bz2
+iasi_file_pattern = "W_XX-EUMETSAT-{ears_station:3s},iasi,{platform_name2:6s}+{ears_station2:3s}_C_EUMS_{proc_time:%Y%m%d%H%M%S}_IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z"
 
 VAR_NAMES_AND_TYPES = {
     "temp": ('air_temperature_ml', 'f'),

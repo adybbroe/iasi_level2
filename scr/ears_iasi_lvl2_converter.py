@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016, 2017 Adam.Dybbroe
+# Copyright (c) 2016, 2017, 2020 Adam.Dybbroe
 
 # Author(s):
 
@@ -24,6 +24,21 @@
 convert to netCDF
 """
 
+from iasi_level2.utils import granule_inside_area
+from pyresample import utils as pr_utils
+from iasi_level2.iasi_lvl2 import iasilvl2
+from Queue import Empty
+import threading
+from multiprocessing import Pool, Manager
+from datetime import datetime, timedelta
+from posttroll.message import Message
+import netifaces
+import tempfile
+from posttroll.publisher import Publish
+import posttroll.subscriber
+from urlparse import urlparse
+import sys
+import socket
 import os
 from ConfigParser import RawConfigParser
 import logging
@@ -64,26 +79,9 @@ _DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 _DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
 
 servername = None
-import socket
 servername = socket.gethostname()
 SERVERNAME = OPTIONS.get('servername', servername)
 
-import sys
-from urlparse import urlparse
-import posttroll.subscriber
-from posttroll.publisher import Publish
-import tempfile
-import netifaces
-from posttroll.message import Message
-from datetime import datetime, timedelta
-
-from multiprocessing import Pool, Manager
-import threading
-from Queue import Empty
-
-from iasi_level2.iasi_lvl2 import iasilvl2
-from pyresample import utils as pr_utils
-from iasi_level2.utils import granule_inside_area
 
 sat_dict = {'npp': 'Suomi NPP',
             'noaa19': 'NOAA 19',
@@ -93,6 +91,7 @@ sat_dict = {'npp': 'Suomi NPP',
             'terra': 'Terra',
             'metop-b': 'Metop-B',
             'metop-a': 'Metop-A',
+            'metop-c': 'Metop-C'
             }
 
 

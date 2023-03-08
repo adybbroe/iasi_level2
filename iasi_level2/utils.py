@@ -31,7 +31,7 @@ PLATFORMS = {'M01': 'Metop-B',
              'METOPC': 'Metop-C'}
 
 from pyorbital import orbital
-from pyresample.spherical_geometry import point_inside, Coordinate
+from pyresample.spherical_geometry import Coordinate, point_inside
 
 
 def granule_inside_area(start_time, end_time, platform_name, area_def):

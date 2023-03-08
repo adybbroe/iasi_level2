@@ -24,24 +24,27 @@
 convert to netCDF
 """
 
-from iasi_level2.utils import granule_inside_area
-from pyresample import utils as pr_utils
-from iasi_level2.iasi_lvl2 import iasilvl2
-from Queue import Empty
-import threading
-from multiprocessing import Pool, Manager
-from datetime import datetime, timedelta
-from posttroll.message import Message
-import netifaces
-import tempfile
-from posttroll.publisher import Publish
-import posttroll.subscriber
-from urlparse import urlparse
-import sys
-import socket
-import os
-from ConfigParser import RawConfigParser
 import logging
+import os
+import socket
+import sys
+import tempfile
+import threading
+from datetime import datetime, timedelta
+from multiprocessing import Manager, Pool
+
+import netifaces
+import posttroll.subscriber
+from ConfigParser import RawConfigParser
+from posttroll.message import Message
+from posttroll.publisher import Publish
+from pyresample import utils as pr_utils
+from Queue import Empty
+from urlparse import urlparse
+
+from iasi_level2.iasi_lvl2 import iasilvl2
+from iasi_level2.utils import granule_inside_area
+
 LOG = logging.getLogger(__name__)
 
 CFG_DIR = os.environ.get('IASI_LVL2_CONFIG_DIR', './')

@@ -24,10 +24,12 @@
 
 """
 
-import os
-from ConfigParser import RawConfigParser
 import argparse
 import logging
+import os
+
+from ConfigParser import RawConfigParser
+
 LOG = logging.getLogger(__name__)
 
 #: Default time format
@@ -38,12 +40,12 @@ _DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
 
 
 import socket
-from ftplib import FTP
-from datetime import datetime, timedelta
 import tempfile
+from datetime import datetime, timedelta
+from ftplib import FTP
+
 import numpy as np
 from trollsift import Parser
-
 
 if __name__ == "__main__":
 

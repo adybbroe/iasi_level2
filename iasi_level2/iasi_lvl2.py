@@ -24,13 +24,15 @@
 some quantities and outputs a netCDF file.
 
 """
+import logging
 import os
+from datetime import datetime, timedelta
+
 import h5py
 import numpy as np
 from netCDF4 import Dataset
-from datetime import datetime, timedelta
 from trollsift import parser
-import logging
+
 LOG = logging.getLogger(__name__)
 
 from .utils import PLATFORMS

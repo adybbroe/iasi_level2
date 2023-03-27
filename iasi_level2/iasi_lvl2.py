@@ -20,11 +20,10 @@ from .constants import (
     PLATFORMS,
     SURFACE_VAR_NAMES_AND_TYPES,
     VAR_NAMES_AND_TYPES,
-    iasi_file_pattern,
+    IASI_FILE_PATTERN,
 )
 
 LOG = logging.getLogger(__name__)
-
 
 
 def qair2rh(qair, temp, press=1013.25):

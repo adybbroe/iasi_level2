@@ -47,23 +47,19 @@ from iasi_level2.utils import granule_inside_area
 
 LOG = logging.getLogger(__name__)
 
-CFG_DIR = os.environ.get('IASI_LVL2_CONFIG_DIR', './')
-DIST = os.environ.get("SMHI_DIST", 'elin4')
-if not DIST or DIST == 'linda4':
-    MODE = 'offline'
-else:
-    MODE = os.environ.get("SMHI_MODE", 'offline')
+CFG_DIR = os.environ.get("IASI_LVL2_CONFIG_DIR", "./")
+CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
+if not os.path.exists(CFG_FILE):
+    raise IOError("Config file %s does not exist!" % CFG_FILE)
+
+AREA_DEF_FILE = os.path.join(CFG_DIR, "areas.def")
+DIST = os.environ.get("SMHI_DIST", "elin5")
+MODE = os.environ.get("SMHI_MODE", "offline")
 
 CONF = RawConfigParser()
-CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
 LOG.debug("Config file = " + str(CFG_FILE))
-AREA_DEF_FILE = os.path.join(CFG_DIR, "areas.def")
-if not os.path.exists(CFG_FILE):
-    raise IOError('Config file %s does not exist!' % CFG_FILE)
 
 CONF.read(CFG_FILE)
-
-PLATFORMS = {'metopa': 'Metop-A', 'metopb': 'Metop-B'}
 
 OPTIONS = {}
 for option, value in CONF.items("DEFAULT"):
@@ -72,30 +68,12 @@ for option, value in CONF.items("DEFAULT"):
 for option, value in CONF.items(MODE):
     OPTIONS[option] = value
 
-OUTPUT_PATH = OPTIONS['output_path']
-AREA_ID = OPTIONS['area_of_interest']
-
-#: Default time format
-_DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-
-#: Default log format
-_DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
+OUTPUT_PATH = OPTIONS["output_path"]
+AREA_ID = OPTIONS["area_of_interest"]
 
 servername = None
 servername = socket.gethostname()
-SERVERNAME = OPTIONS.get('servername', servername)
-
-
-sat_dict = {'npp': 'Suomi NPP',
-            'noaa19': 'NOAA 19',
-            'noaa18': 'NOAA 18',
-            'noaa15': 'NOAA 15',
-            'aqua': 'Aqua',
-            'terra': 'Terra',
-            'metop-b': 'Metop-B',
-            'metop-a': 'Metop-A',
-            'metop-c': 'Metop-C'
-            }
+SERVERNAME = OPTIONS.get("servername", servername)
 
 
 def get_local_ips():

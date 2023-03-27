@@ -27,18 +27,6 @@
 import argparse
 import logging
 import os
-
-from ConfigParser import RawConfigParser
-
-LOG = logging.getLogger(__name__)
-
-#: Default time format
-_DEFAULT_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-
-#: Default log format
-_DEFAULT_LOG_FORMAT = '[%(levelname)s: %(asctime)s : %(name)s] %(message)s'
-
-
 import socket
 import tempfile
 from datetime import datetime, timedelta

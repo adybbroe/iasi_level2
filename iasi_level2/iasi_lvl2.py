@@ -596,11 +596,3 @@ def create_time_coordinate(root, start_time, end_time, timesize=1):
     timeboundvar[0, 1] = end_sec
 
     return 0
-
-
-if __name__ == "__main__":
-    TESTFILE = "/home/a000680/data/iasi/IASI_PW3_02_M01_20160530200854Z_20160530201158Z_N_O_20160530203738Z.h5"
-    l2p = iasilvl2(TESTFILE)
-    l2p.ncwrite()
-    l2p.ncwrite(vprof=False)
-    that = iasilvl2(l2p.nc_filename)

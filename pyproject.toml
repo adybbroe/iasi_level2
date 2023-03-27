@@ -17,7 +17,8 @@
     ]
 
 [tool.poetry.scripts]
-    pytroll_product_filter = "pytroll_product_filter.main:main"
+    ears_iasi_lvl2_converter = "iasi_level2.ears_iasi_lvl2_converter:main"
+    ftpget_iasi_l2 = "iasi_level2.ftpget_iasi_l2:main"
 
 [build-system]
     requires = ["poetry-core >= 1.0.0", "poetry-dynamic-versioning"]

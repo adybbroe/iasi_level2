@@ -5,23 +5,23 @@ import logging
 import os
 import socket
 import tempfile
+from configparser import RawConfigParser
 from datetime import datetime, timedelta
 from ftplib import FTP
 
 import numpy as np
 from trollsift import Parser
 
-if __name__ == "__main__":
+LOG = logging.getLogger(__name__)
 
-    parser = argparse.ArgumentParser(
-        description='ftp retrieval of EARS IASI lvl2 data')
-    parser.add_argument("-d", "--dir",
-                        help="Destination directory path")
-    parser.add_argument("-c", "--cfgdir",
-                        help="Config directory")
-    parser.add_argument("--hours",
-                        help="How far back in time in hours to fetch",
-                        type=int)
+
+def main():
+    parser = argparse.ArgumentParser(description="ftp retrieval of EARS IASI lvl2 data")
+    parser.add_argument("-d", "--dir", help="Destination directory path")
+    parser.add_argument("-c", "--cfgdir", help="Config directory")
+    parser.add_argument(
+        "--hours", help="How far back in time in hours to fetch", type=int
+    )
 
     args = parser.parse_args()
     outpath = args.dir

@@ -328,17 +328,15 @@ def iasi_level2_runner():
     listen_thread.stop()
 
 
-if __name__ == "__main__":
-
+def main():
     handler = logging.StreamHandler(sys.stderr)
 
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(fmt=_DEFAULT_LOG_FORMAT,
-                                  datefmt=_DEFAULT_TIME_FORMAT)
+    formatter = logging.Formatter(fmt=_DEFAULT_LOG_FORMAT, datefmt=_DEFAULT_TIME_FORMAT)
     handler.setFormatter(formatter)
-    logging.getLogger('').addHandler(handler)
-    logging.getLogger('').setLevel(logging.DEBUG)
-    logging.getLogger('posttroll').setLevel(logging.INFO)
+    logging.getLogger("").addHandler(handler)
+    logging.getLogger("").setLevel(logging.DEBUG)
+    logging.getLogger("posttroll").setLevel(logging.INFO)
 
-    LOG = logging.getLogger('ears_iasi_lvl2_converter')
+    LOG = logging.getLogger("ears_iasi_lvl2_converter")
     iasi_level2_runner()

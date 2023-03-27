@@ -214,11 +214,13 @@ class IasiLvl2(object):
             idx_a[1::2] = index2
             idx_b[0::2] = index3
             idx_b[1::2] = index4
-            idx = np.empty((index1.size + index2.size + index3.size + index4.size,),
-                           dtype=index1.dtype)
-            idx = idx.reshape((oshape[0] * 2, oshape[1] / 2))
-            idx_a = idx_a.reshape((oshape[0], oshape[1] / 2))
-            idx_b = idx_b.reshape((oshape[0], oshape[1] / 2))
+            idx = np.empty(
+                (index1.size + index2.size + index3.size + index4.size,),
+                dtype=index1.dtype,
+            )
+            idx = idx.reshape((oshape[0] * 2, oshape[1] // 2))
+            idx_a = idx_a.reshape((oshape[0], oshape[1] // 2))
+            idx_b = idx_b.reshape((oshape[0], oshape[1] // 2))
             idx[0::2, :] = idx_a
             idx[1::2, :] = idx_b
             idx = idx.ravel()
@@ -578,16 +580,18 @@ def create_time_coordinate(root, start_time, end_time, timesize=1):
     time_origo = dtobj_1970.strftime("%Y-%m-%d %H:%M:%S.%f")[0:-4]
 
     # Create the variable and set attributes
-    timevar = root.createVariable('time', 'f4', ('time',),
-                                  zlib=True, complevel=NC_COMPRESS_LEVEL)
-    timevar[:] = np.zeros(timesize, dtype=np.float)
+    timevar = root.createVariable(
+        "time", "f4", ("time",), zlib=True, complevel=NC_COMPRESS_LEVEL
+    )
+    timevar[:] = np.zeros(timesize, dtype=np.float64)
     timevar[0] = mid_sec
     setattr(timevar, "long_name", "time")
     setattr(timevar, "units", "seconds since %s +00:00" % (time_origo))
     setattr(timevar, "bounds", "time_bnds")
-    timeboundvar = root.createVariable('time_bnds', 'f4', ('time', 'nv'),
-                                       zlib=True, complevel=NC_COMPRESS_LEVEL)
-    timeboundvar[0, :] = np.zeros(2, dtype=np.float)
+    timeboundvar = root.createVariable(
+        "time_bnds", "f4", ("time", "nv"), zlib=True, complevel=NC_COMPRESS_LEVEL
+    )
+    timeboundvar[0, :] = np.zeros(2, dtype=np.float64)
     timeboundvar[0, 0] = start_sec
     timeboundvar[0, 1] = end_sec
 

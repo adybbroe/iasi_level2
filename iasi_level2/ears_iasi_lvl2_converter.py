@@ -87,7 +87,7 @@ class FilePublisher(threading.Thread):
     """
 
     def __init__(self, queue):
-        threading.Thread.__init__(self)
+        super().__init__()
         self.loop = True
         self.queue = queue
         self.jobs = {}
@@ -101,8 +101,7 @@ class FilePublisher(threading.Thread):
         with Publish("ears_iasi_lvl2_converter", 0, ["netCDF/3"]) as publisher:
             while self.loop:
                 retv = self.queue.get()
-
-                if retv != None:
+                if retv is not None:
                     LOG.info("Publish the IASI level-2 netcdf file")
                     publisher.send(retv)
 
@@ -112,7 +111,7 @@ class FileListener(threading.Thread):
     relevant file for further processing"""
 
     def __init__(self, queue):
-        threading.Thread.__init__(self)
+        super().__init__(self)
         self.loop = True
         self.queue = queue
 

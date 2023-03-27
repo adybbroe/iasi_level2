@@ -1,49 +1,26 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright (c) 2016, 2017, 2020 Adam.Dybbroe
-
-# Author(s):
-
-#   Adam.Dybbroe <a000680@c20671.ad.smhi.se>
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-"""A posttroll runner that takes ears-iasi level-2 hdf5 files and 
-convert to netCDF
-"""
-
+#!/usr/bin/env python3
+"""A posttroll runner that takes ears-iasi level-2 hdf5 files and convert to netCDF."""
 import logging
 import os
 import socket
 import sys
 import tempfile
 import threading
+from configparser import RawConfigParser
 from datetime import datetime, timedelta
 from multiprocessing import Manager, Pool
+from queue import Empty
+from urllib.parse import urlparse
 
 import netifaces
 import posttroll.subscriber
-from ConfigParser import RawConfigParser
 from posttroll.message import Message
 from posttroll.publisher import Publish
 from pyresample import utils as pr_utils
-from Queue import Empty
-from urlparse import urlparse
 
-from iasi_level2.iasi_lvl2 import iasilvl2
-from iasi_level2.utils import granule_inside_area
+from .constants import _DEFAULT_LOG_FORMAT, _DEFAULT_TIME_FORMAT, PLATFORMS
+from .iasi_lvl2 import IasiLvl2
+from .utils import granule_inside_area
 
 LOG = logging.getLogger(__name__)
 

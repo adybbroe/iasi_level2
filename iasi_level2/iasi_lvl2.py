@@ -15,12 +15,12 @@ from trollsift import parser
 from .constants import (
     ATTRIBUTE_NAMES,
     DATA_UPPER_LIMIT,
+    IASI_FILE_PATTERN,
     NC_COMPRESS_LEVEL,
     NODATA,
     PLATFORMS,
     SURFACE_VAR_NAMES_AND_TYPES,
     VAR_NAMES_AND_TYPES,
-    IASI_FILE_PATTERN,
 )
 
 LOG = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ class IasiLvl2(object):
         else:
             self.h5_filename = None
             self.nc_filename = filename
-            prefix = filename.strip(".nc")
+            prefix = filename.strip(".nc").strip("_vcross").strip("_vprof")
 
         self.temp = None
         self.skin_temp = None
@@ -183,7 +183,7 @@ class IasiLvl2(object):
         locs = rootgrp.variables["vcross_name"][:]
         locations = []
         for idx in range(locs.shape[0]):
-            locations.append(locs[idx].tostring().strip("\x00"))
+            locations.append(locs[idx].tobytes().decode("utf-8"))
 
         self.locations = np.array(locations)
         self.latitudes = rootgrp.variables["latitude"][:]

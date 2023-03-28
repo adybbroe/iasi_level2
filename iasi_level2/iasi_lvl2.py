@@ -81,11 +81,6 @@ def qair2tdew(q__, t__, p__):
     return rhel2tdew(t__, rhel)
 
 
-def pressure2height():
-    # FIXME!
-    pass
-
-
 class geophys_parameter(object):
 
     """Container for the geophysical parameter"""

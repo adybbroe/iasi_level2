@@ -10,5 +10,4 @@ def test_iasi_lvl2():
     l2p = IasiLvl2(TESTFILE)
     l2p.ncwrite()
     l2p.ncwrite(vprof=False)
-    raise ValueError(l2p.nc_filename)
     that = IasiLvl2(l2p.nc_filename)

@@ -312,17 +312,17 @@ class IasiLvl2(object):
     def ncwrite(self, filename=None, vprof=True):
         """Write the data to a netCDF file"""
 
-        if filename:
-            self.nc_filename = filename
+        if not filename:
+            filename = self.nc_filename
         # Add extention (vprof/vcross)
-        prfx = self.nc_filename.split(".nc")[0]
+        prfx = filename.split(".nc")[0]
         if vprof:
-            self.nc_filename = prfx + "_vprof.nc"
+            filename = prfx + "_vprof.nc"
         else:
-            self.nc_filename = prfx + "_vcross.nc"
+            filename = prfx + "_vcross.nc"
 
-        LOG.info("Generate netCDF file %s", self.nc_filename)
-        root = Dataset(self.nc_filename, "w", format="NETCDF3_CLASSIC")
+        LOG.info("Generate netCDF file %s", filename)
+        root = Dataset(filename, "w", format="NETCDF3_CLASSIC")
 
         # Add time as a dimension
         new_shape = (1, self.shape[0], self.shape[1], self.shape[2])
@@ -491,14 +491,15 @@ class IasiLvl2(object):
             vcrossboundvar[:, 0] = np.arange(0, shape[3], 60)
             vcrossboundvar[:, 1] = np.arange(59, shape[3], 60)
 
-        self._set_global_attributes(root)
+        self._set_global_attributes(root, filename=filename)
         root.close()
 
-    def _set_global_attributes(self, root):
+    def _set_global_attributes(self, root, filename):
         """Write the global attributes to the netcdf file"""
 
         # Set attributes that differs from those found in the hdf-file
-        setattr(root, "id", self.nc_filename)
+        setattr(root, "id", filename)
+
 
         # Set attributes that are not found in 'header'
         setattr(root, "platform", self.platform_name)

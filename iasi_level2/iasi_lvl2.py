@@ -491,20 +491,8 @@ class IasiLvl2(object):
             vcrossboundvar[:, 0] = np.arange(0, shape[3], 60)
             vcrossboundvar[:, 1] = np.arange(59, shape[3], 60)
 
-        self._set_global_attributes(root, filename=filename)
+        _set_global_attributes(root, filename=filename, platform_name=self.platform_name)
         root.close()
-
-    def _set_global_attributes(self, root, filename):
-        """Write the global attributes to the netcdf file"""
-
-        # Set attributes that differs from those found in the hdf-file
-        setattr(root, "id", filename)
-
-
-        # Set attributes that are not found in 'header'
-        setattr(root, "platform", self.platform_name)
-        setattr(root, "Conventions", "CF-1.6")
-        setattr(root, "institution", "Swedish Meteorological and Hydrological Institute")
 
     def make_position_names(self):
         """From the longitude latitude positions make location names in the form of:
@@ -597,3 +585,15 @@ def create_time_coordinate(root, start_time, end_time, timesize=1):
     timeboundvar[0, 1] = end_sec
 
     return 0
+
+
+def _set_global_attributes(root, filename, platform_name):
+    """Write the global attributes to the netcdf file"""
+
+    # Set attributes that differs from those found in the hdf-file
+    setattr(root, "id", filename)
+
+    # Set attributes that are not found in 'header'
+    setattr(root, "platform", platform_name)
+    setattr(root, "Conventions", "CF-1.6")
+    setattr(root, "institution", "Swedish Meteorological and Hydrological Institute")

@@ -24,7 +24,7 @@ from .utils import granule_inside_area
 
 LOG = logging.getLogger(__name__)
 
-CFG_DIR = os.environ.get("IASI_LVL2_CONFIG_DIR", "./")
+CFG_DIR = os.environ.get("IASI_LVL2_CONFIG_DIR", "./configs")
 CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
 if not os.path.exists(CFG_FILE):
     raise IOError("Config file %s does not exist!" % CFG_FILE)

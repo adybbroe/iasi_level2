@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 def main():
     parser = argparse.ArgumentParser(description="ftp retrieval of EARS IASI lvl2 data")
     parser.add_argument("-d", "--dir", help="Destination directory path")
-    parser.add_argument("-c", "--cfgdir", help="Config directory")
+    parser.add_argument("-c", "--cfgdir", help="Config directory", default="./configs")
     parser.add_argument(
         "--hours", help="How far back in time in hours to fetch", type=int
     )
@@ -26,7 +26,6 @@ def main():
     args = parser.parse_args()
     outpath = args.dir
     hours = args.hours
-    CFG_DIR = args.cfgdir
 
     DIST = os.environ.get("SMHI_DIST", "elin4")
     if not DIST or DIST == "linda4":
@@ -34,12 +33,12 @@ def main():
     else:
         MODE = os.environ.get("SMHI_MODE", "offline")
 
-    CONF = RawConfigParser()
-    CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
-    LOG.debug("Config file = " + str(CFG_FILE))
+    CFG_FILE = os.path.join(args.cfgdir, "iasi_level2_config.cfg")
     if not os.path.exists(CFG_FILE):
         raise IOError("Config file %s does not exist!" % CFG_FILE)
+    LOG.debug("Config file = " + str(CFG_FILE))
 
+    CONF = RawConfigParser()
     CONF.read(CFG_FILE)
     OPTIONS = {}
     for option, value in CONF.items("DEFAULT"):

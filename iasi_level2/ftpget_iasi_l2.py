@@ -19,16 +19,15 @@ LOG = logging.getLogger(__name__)
 
 def main():
     parser = argparse.ArgumentParser(description="ftp retrieval of EARS IASI lvl2 data")
-    parser.add_argument("-d", "--dir", help="Destination directory path")
+    parser.add_argument("-d", "--dir", help="Destination directory path", default=".")
     parser.add_argument("-c", "--cfgdir", help="Config directory", default="./configs")
     parser.add_argument(
-        "--hours", help="How far back in time in hours to fetch", type=int
+        "--hours", help="How far back in time in hours to fetch", type=int, default=1
     )
 
     args = parser.parse_args()
 
     outpath = args.dir
-    hours = args.hours
 
     DIST = os.environ.get("SMHI_DIST", "elin4")
     if not DIST or DIST == "linda4":
@@ -59,7 +58,7 @@ def main():
     PASSWD = OPTIONS["login_passwd"]
 
     today = datetime.today()
-    dtime = timedelta(seconds=3600 * hours)
+    dtime = timedelta(hours=args.hours)
     starttime = today - dtime
 
     filename_parser = Parser(IASI_H5_FILE_PATTERN)

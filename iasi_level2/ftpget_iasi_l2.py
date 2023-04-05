@@ -12,6 +12,8 @@ from ftplib import FTP
 import numpy as np
 from trollsift import Parser
 
+from .constants import IASI_H5_FILE_PATTERN
+
 LOG = logging.getLogger(__name__)
 
 
@@ -59,9 +61,7 @@ def main():
     dtime = timedelta(seconds=3600 * hours)
     starttime = today - dtime
 
-    # IASI_PW3_02_M01_20160309180258Z_20160309180554Z_N_O_20160309184345Z.h5
-    pattern = "IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5"
-    p__ = Parser(pattern)
+    filename_parser = Parser(IASI_H5_FILE_PATTERN)
 
     PREFIXES = [
         "IASI_PW3_",
@@ -74,7 +74,7 @@ def main():
     for remotedir, prefix in zip(REMOTE_DIRS, PREFIXES):
         remotefiles = ftp.nlst(remotedir)
         fnames = [os.path.basename(f) for f in remotefiles]
-        dates_remote = [p__.parse(s)["start_time"] for s in fnames]
+        dates_remote = [filename_parser.parse(s)["start_time"] for s in fnames]
 
         rfarr = np.array(remotefiles)
         drarr = np.array(dates_remote)

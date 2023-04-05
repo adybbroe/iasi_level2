@@ -111,7 +111,7 @@ class FileListener(threading.Thread):
     relevant file for further processing"""
 
     def __init__(self, queue):
-        super().__init__(self)
+        super().__init__()
         self.loop = True
         self.queue = queue
 

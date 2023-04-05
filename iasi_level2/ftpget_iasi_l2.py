@@ -26,6 +26,7 @@ def main():
     )
 
     args = parser.parse_args()
+
     outpath = args.dir
     hours = args.hours
 

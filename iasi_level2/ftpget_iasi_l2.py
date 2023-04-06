@@ -29,11 +29,7 @@ def main():
 
     outpath = args.dir
 
-    DIST = os.environ.get("SMHI_DIST", "elin4")
-    if not DIST or DIST == "linda4":
-        MODE = "offline"
-    else:
-        MODE = os.environ.get("SMHI_MODE", "offline")
+    MODE = os.environ.get("SMHI_MODE", "offline")
 
     CFG_FILE = os.path.join(args.cfgdir, "iasi_level2_config.cfg")
     if not os.path.exists(CFG_FILE):

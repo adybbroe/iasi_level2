@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Constants used throughout the package."""
+"""Runtime constants used throughout the package."""
+import os
 
 NC_COMPRESS_LEVEL = 6
 
@@ -56,5 +57,7 @@ PLATFORMS = {
     "metopb": "Metop-B",
 }
 
-_DEFAULT_LOG_FORMAT = "[%(levelname)s: %(asctime)s : %(name)s] %(message)s"
-_DEFAULT_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DEFAULT_LOG_FORMAT = "[%(levelname)s: %(asctime)s : %(name)s] %(message)s"
+DEFAULT_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+MODE = os.environ.get("SMHI_MODE", "offline")

@@ -12,7 +12,7 @@ from ftplib import FTP
 import numpy as np
 from trollsift import Parser
 
-from .constants import IASI_H5_FILE_PATTERN
+from .constants import IASI_H5_FILE_PATTERN, MODE
 
 LOG = logging.getLogger(__name__)
 
@@ -28,8 +28,6 @@ def main():
     args = parser.parse_args()
 
     outpath = args.dir
-
-    MODE = os.environ.get("SMHI_MODE", "offline")
 
     CFG_FILE = os.path.join(args.cfgdir, "iasi_level2_config.cfg")
     if not os.path.exists(CFG_FILE):

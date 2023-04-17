@@ -3,3 +3,5 @@
 __pycache__/
 poetry.lock
 *.nc
+.coverage
+.coverage.xml

@@ -11,10 +11,7 @@
         "Topic :: Scientific/Engineering"
     ]
     repository = ""
-    authors = [
-        "Adam Dybroe <adam.dybroe@smhi.se>",
-        "Paulo V. C. Medeiros <paulo.medeiros@smhi.se>"
-    ]
+    authors = ["Adam Dybroe <adam.dybroe@smhi.se>"]
 
 [tool.poetry.scripts]
     ears_iasi_lvl2_converter = "iasi_level2.ears_iasi_lvl2_converter:main"

@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
 """Utility/helper functions and classes."""
+from pathlib import Path
+
 from pyorbital import orbital
 from pyresample.spherical_geometry import Coordinate, point_inside
 
 from .constants import PLATFORMS
+
+
+def convert_to_path(fpath, check_existence=True):
+    """Convert input to a pathlib.Path object."""
+    fpath = Path(fpath)
+    if check_existence and not fpath.is_file():
+        raise FileNotFoundError(fpath)
+    return fpath
 
 
 def granule_inside_area(start_time, end_time, platform_name, area_def):

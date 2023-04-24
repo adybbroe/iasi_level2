@@ -11,7 +11,6 @@ import threading
 from configparser import RawConfigParser
 from datetime import datetime, timedelta
 from multiprocessing import Manager, Pool
-from pathlib import Path
 from queue import Empty
 from urllib.parse import urlparse
 
@@ -23,30 +22,24 @@ from pyresample import utils as pr_utils
 
 from .constants import DEFAULT_LOG_FORMAT, DEFAULT_TIME_FORMAT, MODE, PLATFORMS
 from .iasi_lvl2 import IasiLvl2
-from .utils import granule_inside_area
+from .utils import convert_to_path, granule_inside_area
 
-
-def _existing_file(fpath):
-    fpath = Path(fpath)
-    if not fpath.is_file():
-        raise FileNotFoundError(fpath)
-    return fpath
-
-
-parser = argparse.ArgumentParser(description="ftp retrieval of EARS IASI lvl2 data")
+parser = argparse.ArgumentParser(
+    description="Conversion from ears-iasi level-2 hdf5 data to netCDF."
+)
 parser.add_argument(
     "-c",
     "--config-file",
     help="Config file",
     default="configs/iasi_level2_config.cfg",
-    type=_existing_file,
+    type=convert_to_path,
 )
 parser.add_argument(
     "-a",
     "--areas-file",
     help="File containing definition of areas.",
     default="configs/areas.def",
-    type=_existing_file,
+    type=convert_to_path,
 )
 args = parser.parse_args()
 

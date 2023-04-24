@@ -1,5 +1,5 @@
 [tool.poetry]
-    name = "iasi_level2"
+    name = "ears_iasi_lvl2_format_converter"
     version = "0.0.0" # This is just a placeholder for poetry_dynamic_versioning
     description = "EARS-IASI level-2 format converter"
     classifiers = [
@@ -14,7 +14,7 @@
     authors = ["Adam Dybroe <adam.dybroe@smhi.se>"]
 
 [tool.poetry.scripts]
-    ears_iasi_lvl2_converter = "iasi_level2.ears_iasi_lvl2_converter:main"
+    ears_iasi_lvl2_format_converter = "iasi_level2.ears_iasi_lvl2_converter:main"
 
 [build-system]
     requires = ["poetry-core >= 1.0.0", "poetry-dynamic-versioning"]

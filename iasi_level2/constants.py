@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Constants used throughout the package."""
+"""Runtime constants used throughout the package."""
+import os
 
 NC_COMPRESS_LEVEL = 6
 
@@ -17,6 +18,8 @@ NODATA = -9.0
 # W_XX-EUMETSAT-kan,iasi,metopb+kan_C_EUMS_20170419171127_IASI_PW3_02_M01_20170419164952Z_20170419170214Z.hdf
 IASI_FILE_PATTERN = "W_XX-EUMETSAT-{ears_station:3s},iasi,{platform_name2:6s}+{ears_station2:3s}_C_EUMS_{processing_time:%Y%m%d%H%M%S}_IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z"
 
+# IASI_PW3_02_M01_20160309180258Z_20160309180554Z_N_O_20160309184345Z.h5
+IASI_H5_FILE_PATTERN = "IASI_PW3_02_{platform_name:3s}_{start_time:%Y%m%d%H%M%S}Z_{end_time:%Y%m%d%H%M%S}Z_N_O_{creation_time:%Y%m%d%H%M%S}Z.h5"
 
 VAR_NAMES_AND_TYPES = {
     "temp": ("air_temperature_ml", "f"),
@@ -54,5 +57,7 @@ PLATFORMS = {
     "metopb": "Metop-B",
 }
 
-_DEFAULT_LOG_FORMAT = "[%(levelname)s: %(asctime)s : %(name)s] %(message)s"
-_DEFAULT_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DEFAULT_LOG_FORMAT = "[%(levelname)s: %(asctime)s : %(name)s] %(message)s"
+DEFAULT_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+MODE = os.environ.get("SMHI_MODE", "offline")

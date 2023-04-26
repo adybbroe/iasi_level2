@@ -1,5 +1,5 @@
 [tool.poetry]
-    name = "iasi_level2"
+    name = "ears_iasi_lvl2_format_converter"
     version = "0.0.0" # This is just a placeholder for poetry_dynamic_versioning
     description = "EARS-IASI level-2 format converter"
     classifiers = [
@@ -11,14 +11,10 @@
         "Topic :: Scientific/Engineering"
     ]
     repository = ""
-    authors = [
-        "Adam Dybroe <adam.dybroe@smhi.se>",
-        "Paulo V. C. Medeiros <paulo.medeiros@smhi.se>"
-    ]
+    authors = ["Adam Dybroe <adam.dybroe@smhi.se>"]
 
 [tool.poetry.scripts]
-    ears_iasi_lvl2_converter = "iasi_level2.ears_iasi_lvl2_converter:main"
-    ftpget_iasi_l2 = "iasi_level2.ftpget_iasi_l2:main"
+    ears_iasi_lvl2_format_converter = "iasi_level2.ears_iasi_lvl2_converter:main"
 
 [build-system]
     requires = ["poetry-core >= 1.0.0", "poetry-dynamic-versioning"]
@@ -37,6 +33,7 @@
     numpy = "^1.24.2"
     posttroll = "^1.9.0"
     pyorbital = "^1.7.3"
+    pyproj = "~3.4.1"
     pyresample = "^1.26.1"
     pillow = "^9.4.0"
     trollsift = "^0.5.0"
@@ -47,10 +44,16 @@
 
 [tool.poetry.group.test.dependencies]
     pytest = "^7.2.2"
+    pytest-cov = "^3.0.0"
 
 [tool.poetry.group.linting.dependencies]
     black = "^23.1.0"
     isort = "^5.12.0"
+
+[tool.pytest.ini_options]
+    testpaths = ["tests"]
+    addopts = "-v --cov-report=term-missing --cov-report=term:skip-covered --cov-report=xml:.coverage.xml --cov=./"
+    log_cli_level = "INFO"
 
 [tool.black]
     line-length = 90
@@ -58,4 +61,3 @@
 [tool.isort]
     profile = "black"
     line_length = 90
-

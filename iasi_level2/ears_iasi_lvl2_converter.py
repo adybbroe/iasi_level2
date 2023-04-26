@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """A posttroll runner that takes ears-iasi level-2 hdf5 files and convert to netCDF."""
+
+import argparse
 import logging
 import os
 import socket
@@ -18,39 +20,37 @@ from posttroll.message import Message
 from posttroll.publisher import Publish
 from pyresample import utils as pr_utils
 
-from .constants import _DEFAULT_LOG_FORMAT, _DEFAULT_TIME_FORMAT, PLATFORMS
+from .constants import DEFAULT_LOG_FORMAT, DEFAULT_TIME_FORMAT, MODE, PLATFORMS
 from .iasi_lvl2 import IasiLvl2
-from .utils import granule_inside_area
+from .utils import convert_to_path, granule_inside_area
 
-LOG = logging.getLogger(__name__)
+parser = argparse.ArgumentParser(
+    description="Conversion from ears-iasi level-2 hdf5 data to netCDF."
+)
+parser.add_argument(
+    "-c",
+    "--config-file",
+    help="Config file",
+    default="configs/iasi_level2_config.cfg",
+    type=convert_to_path,
+)
+parser.add_argument(
+    "-a",
+    "--areas-file",
+    help="File containing definition of areas.",
+    default="configs/areas.def",
+    type=convert_to_path,
+)
+args = parser.parse_args()
 
-CFG_DIR = os.environ.get("IASI_LVL2_CONFIG_DIR", "./")
-CFG_FILE = os.path.join(CFG_DIR, "iasi_level2_config.cfg")
-if not os.path.exists(CFG_FILE):
-    raise IOError("Config file %s does not exist!" % CFG_FILE)
+logger = logging.getLogger(__name__)
 
-AREA_DEF_FILE = os.path.join(CFG_DIR, "areas.def")
-DIST = os.environ.get("SMHI_DIST", "elin5")
-MODE = os.environ.get("SMHI_MODE", "offline")
+logger.debug(f"Reading configs from file {args.config_file}")
+config = RawConfigParser()
+config.read(args.config_file)
 
-CONF = RawConfigParser()
-LOG.debug("Config file = " + str(CFG_FILE))
-
-CONF.read(CFG_FILE)
-
-OPTIONS = {}
-for option, value in CONF.items("DEFAULT"):
-    OPTIONS[option] = value
-
-for option, value in CONF.items(MODE):
-    OPTIONS[option] = value
-
+OPTIONS = dict(config.items("DEFAULT") + config.items(MODE))
 OUTPUT_PATH = OPTIONS["output_path"]
-AREA_ID = OPTIONS["area_of_interest"]
-
-servername = None
-servername = socket.gethostname()
-SERVERNAME = OPTIONS.get("servername", servername)
 
 
 def get_local_ips():
@@ -58,24 +58,18 @@ def get_local_ips():
         netifaces.ifaddresses(iface).get(netifaces.AF_INET)
         for iface in netifaces.interfaces()
     ]
-    ips = []
-    for addr in inet_addrs:
-        if addr is not None:
-            for add in addr:
-                ips.append(add["addr"])
-    return ips
+    return [ip["addr"] for addrs in inet_addrs for ip in addrs if addrs is not None]
 
 
 def reset_job_registry(objdict, key):
     """Remove job key from registry"""
-    LOG.debug("Release/reset job-key " + str(key) + " from job registry")
-    if key in objdict:
+    logger.debug("Release/reset job-key '%s' from job registry", key)
+    try:
         objdict.pop(key)
-    else:
-        LOG.warning(
-            "Nothing to reset/release - "
-            + "Register didn't contain any entry matching: "
-            + str(key)
+    except KeyError:
+        logger.warning(
+            "Nothing to reset/release: Register didn't contain any entry matching '%s' ",
+            key,
         )
 
 
@@ -102,7 +96,7 @@ class FilePublisher(threading.Thread):
             while self.loop:
                 retv = self.queue.get()
                 if retv is not None:
-                    LOG.info("Publish the IASI level-2 netcdf file")
+                    logger.info("Publish the IASI level-2 netcdf file")
                     publisher.send(retv)
 
 
@@ -111,7 +105,7 @@ class FileListener(threading.Thread):
     relevant file for further processing"""
 
     def __init__(self, queue):
-        super().__init__(self)
+        super().__init__()
         self.loop = True
         self.queue = queue
 
@@ -128,9 +122,8 @@ class FileListener(threading.Thread):
                 if not self.loop:
                     break
 
-                # Check if it is a relevant message:
                 if self.check_message(msg):
-                    LOG.debug("Put the message on the queue...")
+                    logger.debug("Relevant msg detected. Put it in the queue.")
                     self.queue.put(msg)
 
     def check_message(self, msg):
@@ -141,30 +134,31 @@ class FileListener(threading.Thread):
         server = urlobj.netloc
         url_ip = socket.gethostbyname(urlobj.netloc)
         if urlobj.netloc and (url_ip not in get_local_ips()):
-            LOG.warning(
-                "Server %s not the current one: %s", str(server), socket.gethostname()
+            logger.warning(
+                "Server %s not the current one: %s", server, socket.gethostname()
             )
             return False
 
         if "platform_name" not in msg.data or "start_time" not in msg.data:
-            LOG.warning("Message is lacking crucial fields...")
+            logger.warning("Message is lacking crucial fields...")
             return False
 
-        LOG.debug("Ok: message = %s", str(msg))
+        logger.debug("Ok: message = %s", str(msg))
         return True
 
 
 def create_message(resultfile, mda):
     """Create the posttroll message"""
 
+    servername = OPTIONS.get("servername", socket.gethostname())
     to_send = mda.copy()
-    to_send["uri"] = "ssh://%s/%s" % (SERVERNAME, resultfile)
+    to_send["uri"] = f"ssh://{servername}/{resultfile}"
     to_send["uid"] = resultfile
     to_send["type"] = "netCDF"
     to_send["format"] = "IASI-L2"
     to_send["data_processing_level"] = "3"
     environment = MODE
-    pub_message = Message(
+    return Message(
         "/"
         + to_send["format"]
         + "/"
@@ -175,19 +169,17 @@ def create_message(resultfile, mda):
         to_send,
     ).encode()
 
-    return pub_message
-
 
 def format_conversion(mda, scene, job_id, publish_q):
     """Read the hdf5 file and add parameters and convert to netCDF"""
     try:
-        LOG.debug("IASI L2 format converter: Start...")
+        logger.debug("IASI L2 format converter: Start...")
 
         dummy, fname = os.path.split(scene["filename"])
         tempfile.tempdir = OUTPUT_PATH
 
-        area_def = pr_utils.load_area(AREA_DEF_FILE, AREA_ID)
-        LOG.debug("Platform name = %s", scene["platform_name"])
+        area_def = pr_utils.load_area(args.areas_file, OPTIONS["area_of_interest"])
+        logger.debug("Platform name = %s", scene["platform_name"])
 
         # Check if the granule is inside the area of interest:
         inside = granule_inside_area(
@@ -198,11 +190,11 @@ def format_conversion(mda, scene, job_id, publish_q):
         )
 
         if not inside:
-            LOG.info("Data outside area of interest. Ignore...")
+            logger.info("Data outside area of interest. Ignore...")
             return
 
         # File conversion hdf5 -> nc:
-        LOG.info("Read the IASI hdf5 file %s", scene["filename"])
+        logger.info("Read the IASI hdf5 file %s", scene["filename"])
         l2p = IasiLvl2(scene["filename"])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
@@ -211,40 +203,40 @@ def format_conversion(mda, scene, job_id, publish_q):
         _tmp_nc_filename = _tmp_nc_filename_r1.replace(",", "_")
 
         local_path_prefix = os.path.join(OUTPUT_PATH, _tmp_nc_filename)
-        result_file = local_path_prefix + "_vprof.nc"
-        LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
+        result_file = f"{local_path_prefix}_vprof.nc"
+        logger.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
         os.rename(l2p.nc_filename, result_file)
 
         nctmpfilename = tempfile.mktemp()
-        result_file = local_path_prefix + "_vcross.nc"
+        result_file = f"{local_path_prefix}_vcross.nc"
         l2p.ncwrite(nctmpfilename, vprof=False)
-        LOG.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
+        logger.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
         os.rename(l2p.nc_filename, result_file)
 
         pubmsg = create_message(result_file, mda)
-        LOG.info("Sending: " + str(pubmsg))
+        logger.info("Sending: %s", pubmsg)
         publish_q.put(pubmsg)
 
         if isinstance(job_id, datetime):
             dt_ = datetime.utcnow() - job_id
-            LOG.info(
+            logger.info(
                 "IASI level-2 netCDF file "
                 + str(job_id)
                 + " finished. It took: "
                 + str(dt_)
             )
         else:
-            LOG.warning("Job entry is not a datetime instance: " + str(job_id))
+            logger.warning("Job entry is not a datetime instance: %s", job_id)
 
     except:
-        LOG.exception("Failed in IASI L2 format converter...")
+        logger.exception("Failed in IASI L2 format converter...")
         raise
 
 
 def iasi_level2_runner():
     """Listens and triggers processing"""
 
-    LOG.info("*** Start the extraction and conversion of ears iasi level2 profiles")
+    logger.info("*** Start the extraction and conversion of ears iasi level2 profiles")
 
     pool = Pool(processes=6, maxtasksperchild=1)
     manager = Manager()
@@ -261,43 +253,39 @@ def iasi_level2_runner():
         try:
             msg = listener_q.get()
         except Empty:
-            LOG.debug("Empty listener queue...")
+            logger.debug("Empty listener queue...")
             continue
 
-        LOG.debug("Number of threads currently alive: " + str(threading.active_count()))
+        logger.debug("Number of threads currently alive: %d", threading.active_count())
 
         if "start_time" in msg.data:
             start_time = msg.data["start_time"]
         elif "nominal_time" in msg.data:
             start_time = msg.data["nominal_time"]
         else:
-            LOG.warning("Neither start_time nor nominal_time in message!")
+            logger.warning("Neither start_time nor nominal_time in message!")
             start_time = None
 
         if "end_time" in msg.data:
             end_time = msg.data["end_time"]
         else:
-            LOG.warning("No end_time in message!")
-            if start_time:
-                end_time = start_time + timedelta(seconds=60 * 15)
-            else:
-                end_time = None
-
+            logger.warning("No end_time in message!")
+            end_time = start_time + timedelta(seconds=60 * 15) if start_time else None
         if not start_time or not end_time:
-            LOG.warning("Missing either start_time or end_time or both!")
-            LOG.warning("Ignore message and continue...")
+            logger.warning("Missing either start_time or end_time or both!")
+            logger.warning("Ignore message and continue...")
             continue
 
         sensor = str(msg.data["sensor"])
         platform_name = msg.data["platform_name"]
 
-        keyname = str(platform_name) + "_" + str(start_time.strftime("%Y%m%d%H%M"))
+        keyname = f"{platform_name}_{start_time.strftime('%Y%m%d%H%M')}"
 
-        jobs_dict[keyname] = datetime.utcnow()
+        jobs_dict[keyname] = datetime.now()
 
         urlobj = urlparse(msg.data["uri"])
         path, fname = os.path.split(urlobj.path)
-        LOG.debug("path " + str(path) + " filename = " + str(fname))
+        logger.debug("path %s, filename = %s", path, fname)
 
         scene = {
             "platform_name": platform_name,
@@ -330,13 +318,11 @@ def iasi_level2_runner():
 
 def main():
     handler = logging.StreamHandler(sys.stderr)
-
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(fmt=_DEFAULT_LOG_FORMAT, datefmt=_DEFAULT_TIME_FORMAT)
+    formatter = logging.Formatter(fmt=DEFAULT_LOG_FORMAT, datefmt=DEFAULT_TIME_FORMAT)
     handler.setFormatter(formatter)
     logging.getLogger("").addHandler(handler)
     logging.getLogger("").setLevel(logging.DEBUG)
     logging.getLogger("posttroll").setLevel(logging.INFO)
 
-    LOG = logging.getLogger("ears_iasi_lvl2_converter")
     iasi_level2_runner()

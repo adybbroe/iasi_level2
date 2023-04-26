@@ -1,0 +1,451 @@
+REGION: seaice {
+      NAME:           SAR Sea Ice
+      PCS_ID:         seaice
+      PCS_DEF:        proj=stere,lon_0=-26.0,lat_0=67.0,lat_ts=65.0,ellps=WGS84
+      XSIZE:          4000
+      YSIZE:          4000
+      AREA_EXTENT:    (-400000.0, -200000.0, 200000.0, 400000.0)
+};
+
+REGION: bornholm {
+	NAME:	bornholm
+	PCS_ID:	geos_14.9_55.15
+	PCS_DEF:	proj=geos,h=35785831.00
+	XSIZE:	61
+	YSIZE:	34
+	AREA_EXTENT:	(839070.0469936194, 4778950.078093935, 901015.5137445385, 4813676.3967955)
+};
+
+REGION: MSGF {
+        NAME:          Full globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos,lon_0=0.0,a=6378144.0,b=6356759.0,h=35785831.0,rf=295.49
+        XSIZE:         3712
+        YSIZE:         3712
+        AREA_EXTENT:   (-5568742.4, -5568742.4, 5568742.4, 5568742.4)
+};
+
+REGION: msg_disc_small {
+        NAME:          Full globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos,lon_0=0.0,a=6378144.0,b=6356759.0,h=35785831.0,rf=295.49
+        XSIZE:         640
+        YSIZE:         640
+        AREA_EXTENT:   (-5568742.4, -5568742.4, 5568742.4, 5568742.4)
+};
+
+REGION: irak {
+    NAME:	irak
+    PCS_ID:	merc_40.0_32.0
+    PCS_DEF:	proj=merc,lat_0=32.0,lon_0=40.0,ellps=WGS84
+    XSIZE:	1113
+    YSIZE:	1059
+    AREA_EXTENT:	(-1669792.3618991035, 2258423.6490963805, 1669792.3618991037, 5435749.8875746485)
+};
+
+REGION: mali {
+        NAME:   mali
+        PCS_ID: merc_-1.0_19.0
+        PCS_DEF:        proj=merc,lat_0=19.0,lon_0=-1.0,ellps=WGS84
+        XSIZE:  816
+        YSIZE:  705
+        AREA_EXTENT:    (-1224514.3987260093, 1111475.1028522244, 1224514.3987260093, 3228918.5790461157)
+};
+
+
+REGION: libya {
+        NAME:           libya area
+        PCS_ID:         mercator_ts31_625
+        PCS_DEF:        proj=merc, lat_ts=31.625, lon_0=17.875, units=m, ellps=WGS84
+        XSIZE:          1280
+        YSIZE:          1024
+        AREA_EXTENT:    (-1921632.0902750609, 1725320.2028891125, 1918367.9097249391, 4797320.2028891128)
+};
+
+REGION: kuwait {
+        NAME:           kuwait area
+        PCS_ID:         mercator44.75-30
+        PCS_DEF:        proj=merc, lat_ts=30.0, lon_0=44.75, units=m, ellps=WGS84
+        XSIZE:          640
+        YSIZE:          640
+        AREA_EXTENT:    (-1280000.0, 1820000.0, 1280000.0, 4380000.0)
+};
+
+REGION: afghanistan {
+	NAME:		Afghanistan
+	PCS_ID:		merc
+	PCS_DEF:	proj=merc,lat_ts=35,a=6370997.0,lon_0=67.5,lat_0=35
+	XSIZE:		1600
+	YSIZE:		1600
+	AREA_EXTENT:	(-1600000.0, 1600000.0, 1600000.0, 4800000.0)
+};
+
+REGION: EuropeCanary {
+        NAME:          Northern globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos, lon_0=0.0, a=6378169.00, b=6356583.80, h=35785831.0
+        XSIZE:         3000
+        YSIZE:         1200
+        #AREA_EXTENT:   (-4820647.75308,      1967264.34239,      4180561.74437,      5567748.14137)
+        #AREA_EXTENT:    (-4820147.6858850112, 1966764.2751930435, 4181061.8115659896, 5567248.074173444)
+        AREA_EXTENT:    (-4823148.0890508275, 1969764.6783588605, 4178061.4084001728, 5570248.4773392612)
+};
+
+
+
+REGION: AfHorn {
+        NAME:          Eastern globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos, lon_0=0.0, a=6378169.00, b=6356583.80, h=35785831.0
+        XSIZE:         1100
+        YSIZE:         1600
+        #AREA_EXTENT:   (2266804.5917747435, -1330678.8040398397, 5567248.074173444,  3469966.2612673608)
+        AREA_EXTENT:   (2263804.1886089267, -1327678.4008740226, 5564247.6710076267, 3472966.6644331776)
+};
+
+REGION: afhorn {
+        NAME:           Africa horn 3km resolution
+        PCS_ID:         merc50
+        PCS_DEF:        proj=merc,ellps=bessel,lon_0=50.0
+        XSIZE:          1622
+        YSIZE:          1622
+        AREA_EXTENT:    (-2432000.0,-1130348.139543,2432000.0,3733651.860457)
+};
+
+REGION: met09globe {
+        NAME:          Cropped globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos, lon_0=0.0, a=6378169.00, b=6356583.80, h=35785831.0
+        #PCS_DEF:       proj=geos, lon_0=0.0, a=6378144.0, b=6356759.0, h=35785831.0, rf=295.49
+        XSIZE:         3620
+        YSIZE:         3620
+        #AREA_EXTENT:   (-5430729.7301287707, -5430729.7301287707, 5430729.7301287707, 5430729.7301287707)
+        AREA_EXTENT:   (-5432229.9317116784, -5429229.5285458621, 5429229.5285458621, 5432229.9317116784)
+};
+
+REGION: met09globeFull {
+        NAME:          Full globe MSG image 0 degrees
+        PCS_ID:        geos0
+        PCS_DEF:       proj=geos, lon_0=0.0, a=6378169.00, b=6356583.80, h=35785831.0
+        #PCS_DEF:       proj=geos, lon_0=0.0, a=6378144.0, b=6356759.0, h=35785831.0, rf=295.49
+        XSIZE:         3712
+        YSIZE:         3712
+        AREA_EXTENT:   (-5570248.4773392612, -5567248.074173444, 5567248.074173444, 5570248.4773392612)
+};
+
+REGION: met07globe {
+        NAME:          Full globe IODC image 57 degrees
+        PCS_ID:        geos57
+        PCS_DEF:       proj=geos, lon_0=57.0, a=6378140.00, b=6356755.0, h=35785831.0
+        # PCS_DEF:       proj=geos, lon_0=57.0, a=6378169.0, b=6356584.0, h=35785831.0, rf=295.49
+        XSIZE:         2500
+        YSIZE:         2500
+        AREA_EXTENT:   (-5621225.237846375, -5621225.237846375, 5621225.237846375, 5621225.237846375)
+};
+
+REGION: zerodeg_nsper {
+        NAME:          Cropped globe MSG image 0 degrees in Near Sided Perspective projection
+        PCS_ID:        geos0
+        PCS_DEF:       proj=nsper, lon_0=0.0, h=35785831.0
+        XSIZE:         512
+        YSIZE:         512
+        AREA_EXTENT:   (-5500000.0, -5500000.0, 5500000.0, 5500000.0)
+};
+
+REGION: germ {
+	NAME:		Germany
+	PCS_ID:		ps50n1
+	PCS_DEF:	proj=stere,ellps=bessel,lat_0=90,lon_0=5,lat_ts=50,a=6378144.0,b=6356759.0
+	XSIZE:		1024
+	YSIZE:		1024
+	AREA_EXTENT:	(-155100.436345,-4441495.37946,868899.563655,-3417495.37946)
+};
+
+REGION: euro4 {
+	NAME:		Euro 4km area - Europe
+	PCS_ID:		ps60n
+	#PCS_DEF:	proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6377397.155,b=6356078.963
+	XSIZE:		1024
+	YSIZE:		1024
+	AREA_EXTENT:	(-2717181.7304994687,-5571048.1403121399,1378818.2695005313,-1475048.1403121399)
+};
+
+REGION: euro8 {
+	NAME:		Euro 8km area - Europe
+	PCS_ID:		ps60n
+	#PCS_DEF:	proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6377397.155,b=6356078.963
+	XSIZE:		512
+	YSIZE:		512
+	AREA_EXTENT:	(-2717181.7304994687,-5571048.1403121399,1378818.2695005313,-1475048.1403121399)
+};
+
+REGION: euro4fm {
+	NAME:		Euro 4km area - Europe - FM version
+	PCS_ID:		ps60nfm
+    PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6370000.0,b=6370000.0
+	XSIZE:		1024
+	YSIZE:		1024
+	AREA_EXTENT:	(-2717181.7304994687,-5571048.1403121399,1378818.2695005313,-1475048.1403121399)
+};
+
+
+REGION: euro {
+        NAME:           Euro area - Europe
+        PCS_ID:         ps60n
+        PCS_DEF:        proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60
+        XSIZE:          512
+        YSIZE:          512
+        AREA_EXTENT:    (-2717181.7304994687,-5571048.1403121399,1378818.2695005313,-1475048.1403121399)
+};
+
+
+REGION: scan {
+	NAME:		Scandinavia
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60
+	XSIZE:		512
+	YSIZE:		512
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2102234.8425892727)
+};
+
+
+REGION: scan3fm {
+	NAME:		Scandinavia - 3km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6370000.0,b=6370000.0
+	XSIZE:		768
+	YSIZE:		768
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2102234.8425892727)
+};
+
+
+REGION: scan2 {
+	NAME:		Scandinavia - 2km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6377397.155,b=6356078.963
+	XSIZE:		1024
+	YSIZE:		1024
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2102234.8425892727)
+};
+
+REGION: scan4 {
+	NAME:		Scandinavia - 4km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6377397.155,b=6356078.963
+	XSIZE:		512
+	YSIZE:		512
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2102234.8425892727)
+};
+
+REGION: scan2fm {
+	NAME:		Scandinavia - 2km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6370000.0,b=6370000.0
+	XSIZE:		1024
+	YSIZE:		1024
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2102234.8425892727)
+};
+
+REGION: scan1 {
+	NAME:		Scandinavia - 1km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6377397.155,b=6356078.963
+	XSIZE:		2048
+	YSIZE:		2088
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2062234.8425892727)
+};
+
+REGION: scan1fm {
+	NAME:		Scandinavia - 1km area
+	PCS_ID:		ps60n
+	PCS_DEF:	proj=stere,lat_0=90,lon_0=14,lat_ts=60,a=6370000.0,b=6370000.0
+	XSIZE:		2048
+	YSIZE:		2088
+	AREA_EXTENT:	(-1268854.1266382949, -4150234.8425892727, 779145.8733617051, -2062234.8425892727)
+};
+
+REGION: mesanX {
+	NAME:		Mesan-X rotated lon/lat 1.8km
+	PCS_ID:		mesan
+	PCS_DEF:        proj=ob_tran,o_proj=eqc,o_lat_p=30,o_lon_p=10,lon_0=-10,a=6371000.0
+	XSIZE:	        1476
+	YSIZE:		1608
+	AREA_EXTENT:	(1067435.7598983962, -1278764.8903419089, 3791765.9965939857, 1690140.6680267097)
+};
+
+REGION: mesanA {
+	NAME:		Mesan-A rotated lon/lat 1.0km
+	PCS_ID:		mesan
+	PCS_DEF:        proj=ob_tran,o_proj=eqc,o_lat_p=30,o_lon_p=0,lon_0=15,a=6367470.0,b=6367470.0
+	XSIZE:	        1750
+	YSIZE:		2164
+	AREA_EXTENT:	(-884343.45456479234, -759096.11850326974, 866117.590655179, 1405225.220761982)
+};
+
+# REGION: mesanE {
+# 	NAME:		Europe Mesan rotated lon/lat 1.8km
+# 	PCS_ID:		mesan
+# 	PCS_DEF:        proj=ob_tran,o_proj=eqc,o_lat_p=30,o_lon_p=10,lon_0=-10,a=6371000.0
+# 	XSIZE:	        5093
+# 	YSIZE:		6294
+# 	AREA_EXTENT:	(289083.00056196708, -2957836.6467769896, 5381881.121371055, 3335826.6850212598)
+# };
+REGION: mesanE {
+	NAME:		Europe Mesan rotated lon/lat 1.8km
+	PCS_ID:		mesan
+	PCS_DEF:        proj=ob_tran,o_proj=eqc,o_lat_p=30,o_lon_p=0,lon_0=15,a=6371000.0
+	XSIZE:	        3287
+	YSIZE:		3114
+	AREA_EXTENT:	(-2394799.8041610033, -3287307.9622484925, 3520722.2142395116, 2316989.0060143536)
+};
+
+
+REGION: mesanEx {
+	NAME:		Extended Europe Mesan rotated lon/lat 1.8km
+	PCS_ID:		mesan
+	PCS_DEF:        proj=ob_tran,o_proj=eqc,o_lat_p=30,o_lon_p=0,lon_0=15,a=6371000.0
+	XSIZE:	        4040
+	YSIZE:		3280
+	AREA_EXTENT:	(-3753162.359033791, -3587148.3335534637, 3518541.0638137744, 2317302.271272628)
+};
+
+
+REGION: baws {
+	NAME:           BAWS
+	PCS_ID:         baws
+	PCS_DEF:        proj=aea,ellps=bessel,lon_0=14,lat_1=60,lat_2=60
+	XSIZE:          1400
+	YSIZE:          1400
+	AREA_EXTENT:    (-475617, 5324430, 924383, 6724430)
+};
+
+REGION: eurotv {
+        NAME:           Europe TV -  6.2x5.0km
+        PCS_ID:         eurotv
+        PCS_DEF:        proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60,a=6378144.0,b=6356759.0
+        XSIZE:          1024
+        YSIZE:          1024
+        AREA_EXTENT:    (-3503748.8201907813, -6589593.1340587894, 2842567.6359087573, -1499856.5846593212)
+};
+
+REGION: eurotv4n {
+        NAME:           Europe TV4 -  4.1x4.1km
+        PCS_ID:         eurotv4n
+        PCS_DEF:        proj=stere,ellps=bessel,lat_0=90,lon_0=14,lat_ts=60,a=6378144.0,b=6356759.0
+        XSIZE:          2048
+        YSIZE:          1152
+        AREA_EXTENT:    (-5103428.6786669521, -6772478.6005340703, 3293371.3213330479, -2049278.6005340703)
+};
+
+REGION: eurol {
+        NAME:           Euro 3.0km area - Europe
+        PCS_ID:         ps60wgs84
+        PCS_DEF:        proj=stere,ellps=WGS84,lat_0=90,lon_0=0,lat_ts=60
+        XSIZE:          2560
+        YSIZE:          2048
+        AREA_EXTENT:    (-3780000.0, -7644000.0, 3900000.0, -1500000.0)
+};
+
+REGION: euron1 {
+	NAME:		Northern Europe - 1km
+	PCS_ID:		ps60wgs84
+	PCS_DEF:	proj=stere,ellps=WGS84,lat_0=90,lon_0=0,lat_ts=60
+	XSIZE:		3072
+	YSIZE:		3072
+	AREA_EXTENT:	(-1000000.0, -4500000.0, 2072000.0, -1428000.0)
+
+};
+
+REGION: baltrad_lambert {
+        NAME:           Baltrad Lambert
+        PCS_ID:         laea20e60n
+        PCS_DEF:        proj=laea,a=6370997.0,lon_0=20,lat_0=60
+        XSIZE:          815
+        YSIZE:          1195
+        AREA_EXTENT:    (-994211.85388,-1291605.15396,635788.14612,1098394.84604)
+};
+
+# EUMeTrain eport
+# 10566.6kmx10566.6km
+REGION: eport {
+        NAME:           eport
+        PCS_ID:         ps90n
+        PCS_DEF:        proj=stere,lat_0=90,lon_0=0,ellps=WGS84,units=m
+        YSIZE:          1792
+        XSIZE:          1792
+        AREA_EXTENT:    (-5283418.6258347519, -5283418.6258347528, 5283418.6258347528, 5283418.6258347519)
+};
+
+REGION: scanice {
+	NAME:		Scandinavia and Iceland
+	PCS_ID:		laea65e40n
+	PCS_DEF:	proj=laea,a=6370997.0,lon_0=0,lat_0=64
+	XSIZE:		1280
+	YSIZE:		1024
+	AREA_EXTENT:	(-1920000.0, -1536000.0, 1920000.0, 1536000.0)
+};
+
+REGION: baws250 {
+	NAME:           BAWS, 250m resolution
+	PCS_ID:         baws250
+	PCS_DEF:        proj=aea,ellps=WGS84,lon_0=14,lat_1=60,lat_2=60
+	XSIZE:          5600
+	YSIZE:          5600
+	AREA_EXTENT:    (-475617, 5324430, 924383, 6724430)
+};
+
+REGION: darmstadt_nsper {
+        NAME:           Darmstadt, Near-Sided Perspective
+        PCS_ID:         nsper_ds
+        PCS_DEF:        proj=nsper,lon_0=8.7,lat_0=49.9,a=6378169.00,b=6356583.80,h=35785831.0
+        XSIZE:          425
+        YSIZE:          425
+        AREA_EXTENT:    (-5570248.4773392612, -5567248.074173444, 5567248.074173444, 5570248.4773392612)
+};
+
+REGION: worldeqc3km73 {
+        NAME:       World in 3km, platecarree
+        PCS_ID:     plate_carree
+        PCS_DEF:    units=m, proj=eqc, ellps=WGS84
+        XSIZE:      4096
+        YSIZE:      2048
+        AREA_EXTENT: (-20037508.3428, -8181982.573309999, 20037508.3428, 8181982.573309999)
+};
+
+REGION: northeurope {
+	NAME:           North Europe
+	PCS_ID:         merc_10.0_55.0
+	PCS_DEF:	proj=merc,lat_0=55.0,lon_0=10.0,ellps=WGS84
+	XSIZE:	        1669
+	YSIZE:	        3003
+	AREA_EXTENT:	(-3339584.7237982075, 3482189.0854086173, 3339584.723798207, 15496570.739723718)
+};
+REGION: arome {
+	NAME:	arome
+	PCS_ID:	eqc_17.5_63.0
+	PCS_DEF:	proj=eqc,lat_0=63.0,lon_0=17.5,ellps=WGS84
+	XSIZE:	3072
+	YSIZE:	1158
+	AREA_EXTENT:	(-3840522.4323679386, -1447153.3803125564, 3840522.4323679386, 1447153.380312557)
+};
+
+
+REGION:arome3km{
+	NAME:	arome3km
+	PCS_ID:	lcc_15_63
+	PCS_DEF:	proj=lcc,lat_0=63,lon_0=15,ellps=WGS84,lat_1=63,lat_2=63
+	XSIZE:	751
+	YSIZE:	807
+	AREA_EXTENT:	(-1051878.1366709638, -1168789.99317001, 1201335.1003238147, 1252313.2494337566)
+};
+
+REGION:arome1km{
+	NAME:	arome1km
+	PCS_ID:	lcc_15_63
+	PCS_DEF:	proj=lcc,lat_0=63,lon_0=15,ellps=WGS84,lat_1=63,lat_2=63
+	XSIZE:	2253
+	YSIZE:	2421
+	AREA_EXTENT:	(-1051878.1366709638, -1168789.99317001, 1201335.1003238147, 1252313.2494337566)
+};

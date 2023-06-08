@@ -130,6 +130,10 @@ class FileListener(threading.Thread):
         if not msg:
             return False
 
+        if msg.type != 'file':
+            logger.debug("Message type is not a file: %s - continue", str(msg.type))
+            return False
+
         urlobj = urlparse(msg.data["uri"])
         server = urlobj.netloc
         url_ip = socket.gethostbyname(urlobj.netloc)

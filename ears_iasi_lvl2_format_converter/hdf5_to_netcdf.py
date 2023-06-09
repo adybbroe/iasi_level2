@@ -208,14 +208,16 @@ def format_conversion(mda, scene, job_id, publish_q):
 
         local_path_prefix = os.path.join(OUTPUT_PATH, _tmp_nc_filename)
         result_file = f"{local_path_prefix}_vprof.nc"
-        logger.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
-        os.rename(l2p.nc_filename, result_file)
+        current_file = f"{nctmpfilename}_vprof.nc"
+        logger.info("Rename netCDF file %s to %s", current_file, result_file)
+        os.rename(current_file, result_file)
 
         nctmpfilename = tempfile.mktemp()
         result_file = f"{local_path_prefix}_vcross.nc"
         l2p.ncwrite(nctmpfilename, vprof=False)
-        logger.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
-        os.rename(l2p.nc_filename, result_file)
+        current_file = f"{nctmpfilename}_vcross.nc"
+        logger.info("Rename netCDF file %s to %s", current_file, result_file)
+        os.rename(current_file, result_file)
 
         pubmsg = create_message(result_file, mda)
         logger.info("Sending: %s", pubmsg)

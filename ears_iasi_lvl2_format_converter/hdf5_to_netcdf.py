@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from multiprocessing import Manager, Pool
 from queue import Empty
 from urllib.parse import urlparse
+from pathlib import Path
 
 import netifaces
 import posttroll.subscriber
@@ -156,8 +157,8 @@ def create_message(resultfile, mda):
 
     servername = OPTIONS.get("servername", socket.gethostname())
     to_send = mda.copy()
-    to_send["uri"] = f"ssh://{servername}/{resultfile}"
-    to_send["uid"] = resultfile
+    to_send["uri"] = resultfile
+    to_send["uid"] = Path(resultfile).name
     # Product:
     if 'vcross' in resultfile:
         to_send["product"] = 'iasi_l2_vcross'

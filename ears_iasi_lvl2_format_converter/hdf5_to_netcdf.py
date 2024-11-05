@@ -163,16 +163,15 @@ def create_message(resultfile, mda):
         to_send["product"] = 'iasi_l2_vcross'
     if 'vprof' in resultfile:
         to_send["product"] = 'iasi_l2_vprof'
-    to_send["type"] = "netCDF"
-    to_send["format"] = "IASI-L2"
+    to_send["type"] = "IASI-L2"
+    to_send["format"] = "netCDF"
     to_send["data_processing_level"] = "3"
     environment = MODE
     return Message(
         "/"
-        + to_send["format"]
+        + to_send["type"]
         + "/"
         + to_send["data_processing_level"]
-        + environment
         + "/polar/regional/",
         "file",
         to_send,

@@ -316,6 +316,8 @@ class IasiLvl2(object):
         else:
             filename = prfx + "_vcross.nc"
 
+        self.nc_filename = filename
+
         LOG.info("Generate netCDF file %s", filename)
         root = Dataset(filename, "w", format="NETCDF3_CLASSIC")
 

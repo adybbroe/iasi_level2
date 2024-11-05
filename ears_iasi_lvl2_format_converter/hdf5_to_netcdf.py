@@ -13,12 +13,13 @@ from datetime import datetime, timedelta
 from multiprocessing import Manager, Pool
 from queue import Empty
 from urllib.parse import urlparse
+from pathlib import Path
 
 import netifaces
 import posttroll.subscriber
 from posttroll.message import Message
 from posttroll.publisher import Publish
-from pyresample import utils as pr_utils
+from pyresample import load_area
 
 from .constants import DEFAULT_LOG_FORMAT, DEFAULT_TIME_FORMAT, MODE, PLATFORMS
 from .iasi_lvl2 import IasiLvl2
@@ -130,6 +131,10 @@ class FileListener(threading.Thread):
         if not msg:
             return False
 
+        if msg.type != 'file':
+            logger.info(f"Message type {str(msg.type)} is not 'file'. Continue...")
+            return False
+
         urlobj = urlparse(msg.data["uri"])
         server = urlobj.netloc
         url_ip = socket.gethostbyname(urlobj.netloc)
@@ -152,18 +157,22 @@ def create_message(resultfile, mda):
 
     servername = OPTIONS.get("servername", socket.gethostname())
     to_send = mda.copy()
-    to_send["uri"] = f"ssh://{servername}/{resultfile}"
-    to_send["uid"] = resultfile
-    to_send["type"] = "netCDF"
-    to_send["format"] = "IASI-L2"
+    to_send["uri"] = resultfile
+    to_send["uid"] = Path(resultfile).name
+    # Product:
+    if 'vcross' in resultfile:
+        to_send["product"] = 'iasi_l2_vcross'
+    if 'vprof' in resultfile:
+        to_send["product"] = 'iasi_l2_vprof'
+    to_send["type"] = "IASI-L2"
+    to_send["format"] = "netCDF"
     to_send["data_processing_level"] = "3"
     environment = MODE
     return Message(
         "/"
-        + to_send["format"]
+        + to_send["type"]
         + "/"
         + to_send["data_processing_level"]
-        + environment
         + "/polar/regional/",
         "file",
         to_send,
@@ -178,7 +187,7 @@ def format_conversion(mda, scene, job_id, publish_q):
         dummy, fname = os.path.split(scene["filename"])
         tempfile.tempdir = OUTPUT_PATH
 
-        area_def = pr_utils.load_area(args.areas_file, OPTIONS["area_of_interest"])
+        area_def = load_area(args.areas_file, OPTIONS["area_of_interest"])
         logger.debug("Platform name = %s", scene["platform_name"])
 
         # Check if the granule is inside the area of interest:
@@ -198,6 +207,7 @@ def format_conversion(mda, scene, job_id, publish_q):
         l2p = IasiLvl2(scene["filename"])
         nctmpfilename = tempfile.mktemp()
         l2p.ncwrite(nctmpfilename)
+        logger.debug(f"Filename = {l2p.nc_filename}")
         _tmp_nc_filename = fname.split(".")[0]
         _tmp_nc_filename_r1 = _tmp_nc_filename.replace("+", "_")
         _tmp_nc_filename = _tmp_nc_filename_r1.replace(",", "_")
@@ -206,6 +216,10 @@ def format_conversion(mda, scene, job_id, publish_q):
         result_file = f"{local_path_prefix}_vprof.nc"
         logger.info("Rename netCDF file %s to %s", l2p.nc_filename, result_file)
         os.rename(l2p.nc_filename, result_file)
+
+        pubmsg = create_message(result_file, mda)
+        logger.info("Sending: %s", pubmsg)
+        publish_q.put(pubmsg)
 
         nctmpfilename = tempfile.mktemp()
         result_file = f"{local_path_prefix}_vcross.nc"
